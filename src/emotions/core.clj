@@ -51,13 +51,14 @@
   (let [desire (:desire motivation)
         last-desire (:last-desire motivation)
         max-change (:max-change motivation)
+        max-change-delta (:max-change-delta motivation default-max-change-delta)
         change (- desire last-desire)]
     (if (> (Math/abs change) max-change)
       (if (neg? change)
         (assoc motivation :desire (- last-desire max-change)
-                          :max-change (+ max-change default-max-change-delta))
+                          :max-change (+ max-change max-change-delta))
         (assoc motivation :desire (+ last-desire max-change)
-                          :max-change (+ max-change default-max-change-delta)))
+                          :max-change (+ max-change max-change-delta)))
       motivation)))
 
 (defn start-update
