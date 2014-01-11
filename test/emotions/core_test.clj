@@ -75,7 +75,7 @@
                                               :max-change 0.3}))))
 
 ;; if defined, max-change-delta from motivation should be used to
-;;adjust max-change
+;; adjust max-change
 (expect (< 0.32
            (:max-change (limit-desire-change {:desire 0.9
                                               :last-desire 0.4

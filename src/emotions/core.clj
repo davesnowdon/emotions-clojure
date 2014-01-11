@@ -65,3 +65,15 @@
   "Save the current state of all motivations when starting a new update cycle"
   [motivations]
   (map #(assoc % :last-desire (:desire %)) motivations))
+
+(defn apply-update-limits
+  "Apply update limits to a motivation"
+  [motivation]
+  (-> motivation
+      limit-desire-change
+      limit-desire-to-range))
+
+(defn end-update
+  "Apply limits at end of an update cycle"
+  [motivations]
+  (map apply-update-limits motivations))
