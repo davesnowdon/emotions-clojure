@@ -22,3 +22,8 @@
   (if-let [percept-score ((:name motivation) (:satisfaction-vector percept))]
     (assoc motivation :desire (+ (:desire motivation) percept-score))
     motivation))
+
+(defn add-percepts
+  "Modify a sequence of motivations by adding the values from a sequence of percepts"
+  [motivations percepts]
+  (map #(reduce add-percept % percepts) motivations))
