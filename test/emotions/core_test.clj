@@ -52,16 +52,16 @@
                                                 :max-change 0.3})))
 
 ;; desire should be limited to not increasing by more than :max-change
-(expect #(float= 0.7 %)
-        (:desire (limit-desire-change {:desire 0.9
-                                       :last-desire 0.4
-                                       :max-change 0.3})))
+(expect (float= 0.7
+                (:desire (limit-desire-change {:desire 0.9
+                                               :last-desire 0.4
+                                               :max-change 0.3}))))
 
 ;; desire should be limited to not decreasing by more than max change
-(expect #(float= 0.1 %)
-        (:desire (limit-desire-change {:desire 0.0
-                                       :last-desire 0.4
-                                       :max-change 0.3})))
+(expect (float= 0.1
+                (:desire (limit-desire-change {:desire 0.0
+                                               :last-desire 0.4
+                                               :max-change 0.3}))))
 
 ;; max-change should be incremented when desire changes more than max-change
 (expect (< 0.3
