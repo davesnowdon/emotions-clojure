@@ -34,26 +34,12 @@
   [motivations percepts]
   (map #(reduce add-percept % percepts) motivations))
 
-(defn min-desire
-  "Get the minimum desire from motivation or use default"
-  [motivation]
-  (if-let [min-desire (:min-desire motivation)]
-    min-desire
-    default-min-desire))
-
-(defn max-desire
-  "Get the maximum desire from motivation or use default"
-  [motivation]
-  (if-let [max-desire (:max-desire motivation)]
-    max-desire
-    default-max-desire))
-
 (defn limit-desire-to-range
   "Limit the value of a motivations desire to that defined by its range"
   [motivation]
   (let [desire (:desire motivation)
-        min-desire (min-desire motivation)
-        max-desire (max-desire motivation)]
+        min-desire (:min-desire motivation default-min-desire)
+        max-desire (:max-desire motivation default-max-desire)]
     (cond
      (< desire min-desire) (assoc motivation :desire min-desire)
      (> desire max-desire) (assoc motivation :desire max-desire)
