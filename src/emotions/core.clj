@@ -6,10 +6,15 @@
 
 ;; percepts are maps with a key :satisfaction-vector
 
-(defn decay
+(defn decay-motivation
   "Decay a motivation's current desire by the amount of its decay rate"
   [motivation]
   (assoc motivation :desire (+ (:desire motivation) (:decay-rate motivation))))
+
+(defn decay-all-motivations
+  "Decay a sequence of motivations"
+  [motivations]
+  (map decay-motivation motivations))
 
 (defn add-percept
   "Add the from a percept's satisfaction vector with the motivations current desire"
