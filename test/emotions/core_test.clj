@@ -25,6 +25,27 @@
 ;; check that we save the value of desire when starting an update
 (expect 0.5 (:last-desire (first (start-update [{:desire 0.5}]))))
 
+;; desire should not be changed if it is within range
+(expect 0.5 (:desire (limit-desire-to-range {:desire 0.5
+                                             :min-desire 0.0
+                                             :max-desire 1.0})))
+
+;; desire should not be allowed to be greater than max-desire
+(expect 0.8 (:desire (limit-desire-to-range {:desire 1.0
+                                             :min-desire 0.1
+                                             :max-desire 0.8})))
+
+;; desire should not be allowed to be less than min-desire
+(expect 0.1 (:desire (limit-desire-to-range {:desire 0.0
+                                             :min-desire 0.1
+                                             :max-desire 0.8})))
+
+;; if motivation does not define :min-desire default of 0.0 should be used
+(expect 0.0 (:desire (limit-desire-to-range {:desire -1})))
+
+;; if motivation does not define :max-desire default of 1.0 should be used
+(expect 1.0 (:desire (limit-desire-to-range {:desire 2})))
+
 ;; desire should not change if it has changed less than :max-change
 (expect 0.5 (:desire (limit-desire-change {:desire 0.5
                                            :last-desire 0.4
