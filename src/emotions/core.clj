@@ -27,3 +27,8 @@
   "Modify a sequence of motivations by adding the values from a sequence of percepts"
   [motivations percepts]
   (map #(reduce add-percept % percepts) motivations))
+
+(defn start-update
+  "Save the current state of all motivations when starting a new update cycle"
+  [motivations]
+  (map #(assoc % :last-desire (:desire %)) motivations))
