@@ -10,6 +10,7 @@
 ;; define default range for motivation desire values
 (def default-min-desire 0.0)
 (def default-max-desire 1.0)
+(def default-max-change-delta 0.01)
 
 (defn decay-motivation
   "Decay a motivation's current desire by the amount of its decay rate"
@@ -67,8 +68,10 @@
         change (- desire last-desire)]
     (if (> (Math/abs change) max-change)
       (if (neg? change)
-        (assoc motivation :desire (- last-desire max-change))
-        (assoc motivation :desire (+ last-desire max-change)))
+        (assoc motivation :desire (- last-desire max-change)
+                          :max-change (+ max-change default-max-change-delta))
+        (assoc motivation :desire (+ last-desire max-change)
+                          :max-change (+ max-change default-max-change-delta)))
       motivation)))
 
 (defn start-update

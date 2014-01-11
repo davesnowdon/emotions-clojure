@@ -62,3 +62,14 @@
         (:desire (limit-desire-change {:desire 0.0
                                        :last-desire 0.4
                                        :max-change 0.3})))
+
+;; max-change should be incremented when desire changes more than max-change
+(expect (< 0.3
+           (:max-change (limit-desire-change {:desire 0.9
+                                              :last-desire 0.4
+                                              :max-change 0.3}))))
+
+(expect (< 0.3
+           (:max-change (limit-desire-change {:desire 0.0
+                                              :last-desire 0.4
+                                              :max-change 0.3}))))
