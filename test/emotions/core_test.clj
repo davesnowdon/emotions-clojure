@@ -1,7 +1,7 @@
 (ns emotions.core-test
-  (:require [clojure.test :refer :all]
-            [emotions.core :refer :all]))
+  (:require [emotions.core :refer :all]
+            [expectations :refer :all]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(def hunger {:desire 0.0 :decay 0.1})
+
+(expect 0.1 (:desire (decay hunger)))
