@@ -77,3 +77,11 @@
   "Apply limits at end of an update cycle"
   [motivations]
   (map apply-update-limits motivations))
+
+(defn motivations->sv
+  "Create a satisfaction vector from a sequence of motivations with each key in the satisfaction vector being the motivation name and the value being the associated desire score"
+  [motivations]
+  (->> motivations
+       (map (juxt :name :desire))
+       (map (partial apply hash-map))
+       (apply merge-with concat)))

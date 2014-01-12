@@ -87,3 +87,11 @@
                                               :last-desire 0.4
                                               :max-change 0.3
                                               :max-change-delta 0.3}))))
+
+;; should be able to create a satisfaction vector from a sequence
+;; of motivations with each key in the satisfaction vector being
+;; the motivation name and the value being the associated desire score
+(expect {:hunger 0.1, :happiness 0.5, :survival 0.2}
+        (in (motivations->sv [{:name :hunger, :desire 0.1}
+                              {:name :happiness, :desire 0.5}
+                              {:name :survival, :desire 0.2}])))
