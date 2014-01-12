@@ -29,6 +29,7 @@
 ;; define default range for motivation desire values
 (def default-min-desire 0.0)
 (def default-max-desire 1.0)
+(def default-max-change 1.0)
 (def default-max-change-delta 0.01)
 
 (defn decay-motivation
@@ -69,7 +70,7 @@
   [motivation]
   (let [desire (:desire motivation)
         last-desire (:last-desire motivation)
-        max-change (:max-change motivation)
+        max-change (:max-change motivation default-max-change)
         max-change-delta (:max-change-delta motivation default-max-change-delta)
         change (- desire last-desire)]
     (if (> (Math/abs change) max-change)
@@ -96,6 +97,15 @@
   "Apply limits at end of an update cycle"
   [motivations]
   (map apply-update-limits motivations))
+
+(defn update-motivations
+  "Update the motivations desire values for a time step given a sequence of percepts"
+  [motivations percepts]
+  (-> motivations
+      (start-update)
+      (decay-all-motivations)
+      (add-percepts percepts)
+      (end-update)))
 
 (defn motivations->sv
   "Create a satisfaction vector from a sequence of motivations with each key in the satisfaction vector being the motivation name and the value being the associated desire score"

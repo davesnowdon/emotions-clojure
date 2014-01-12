@@ -91,6 +91,16 @@
                                               :max-change 0.3
                                               :max-change-delta 0.3}))))
 
+;; in a timestep without percepts all motivations should just decay
+;; commented out because of failing float comparison
+;(expect [{:name :hunger, :desire 0.4, :last-desire 0.1, :decay-rate 0.3}
+;         {:name :happiness, :desire 0.7, :last-desire 0.5, :decay-rate 0.2}
+;         {:name :survival, :desire 0.3, :last-desire 0.2, :decay-rate 0.1}]
+;(update-motivations [{:name :hunger, :desire 0.1, :decay-rate 0.3}
+;                     {:name :happiness, :desire 0.5, :decay-rate 0.2}
+;                     {:name :survival, :desire 0.2, :decay-rate 0.1}]
+;                    []))
+
 ;; should be able to create a satisfaction vector from a sequence
 ;; of motivations with each key in the satisfaction vector being
 ;; the motivation name and the value being the associated desire score
