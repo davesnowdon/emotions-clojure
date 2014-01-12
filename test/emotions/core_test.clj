@@ -3,7 +3,8 @@
             [emotions.util :refer :all]
             [expectations :refer :all]))
 
-(def hunger {:name :hunger, :desire 0.0, :decay-rate 0.1, :max-change 0.3})
+(def hunger {:name :hunger, :desire 0.0, :decay-rate 0.1, :max-change 0.3,
+             :layer :physical})
 
 (def percept {:satisfaction-vector {:hunger 0.5, :survival 0.0}})
 
@@ -11,7 +12,8 @@
 (expect {:desire 0.1} (in (decay-motivation {:desire 0.0, :decay-rate 0.1})))
 
 ;; decay all motivations should decay each motivation in a sequence
-(expect [{:name :hunger, :desire 0.1, :decay-rate 0.1, :max-change 0.3}]
+(expect [{:name :hunger, :desire 0.1, :decay-rate 0.1,
+          :max-change 0.3, :layer :physical}]
         (decay-all-motivations [hunger]))
 
 ;; adding a percept should modify the motivations desire by the value in the
@@ -19,7 +21,8 @@
 (expect {:desire 0.5} (in (add-percept hunger percept)))
 
 ;; add-percepts should add all percepts to all motivations
-(expect [{:name :hunger, :desire 0.5, :decay-rate 0.1, :max-change 0.3}]
+(expect [{:name :hunger, :desire 0.5, :decay-rate 0.1,
+          :max-change 0.3, :layer :physical}]
         (add-percepts [hunger] [percept]))
 
 ;; check that we save the value of desire when starting an update

@@ -1,6 +1,25 @@
 (ns emotions.core
   (:require [emotions.util :refer :all]))
 
+(def layers [:physical :safety :social :values :contribution])
+
+(def motivation-names {:physical [:anger :fear :pleasure :disgust :attraction
+                                  :bored :sad :calm :tired],
+                       :safety [:rage :playful :gloat :delight :threatened
+                                :envy :greed :hope :giving :anxiety
+                                :relief :disappointed :bored :dread
+                                :lazy :content],
+                       :social [:hate :contempt :pride :amity :jealousy
+                                :sympathy :embarrased :supportive
+                                :shame :accepted :lonely :humility],
+                       :values [:revenge :courage :victory :arrogance
+                                :revulsion :significance :honour
+                                :attainment :useless :pity :guilt
+                                :fulfilled :remorse],
+                       :contribution [:wrath :joy :love :austere :unity
+                                      :awe :resignation :peace
+                                      :despair :serenity]})
+
 ;; motivations are maps
 
 ;; satisfaction vectors are maps with the motivation name as a key
