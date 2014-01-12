@@ -26,7 +26,7 @@
 (defn add-percept
   "Add the from a percept's satisfaction vector with the motivations current desire"
   [motivation percept]
-  (if-let [percept-score ((:name motivation) (:satisfaction-vector percept))]
+  (if-let [percept-score ((:id motivation) (:satisfaction-vector percept))]
     (assoc motivation :desire (+ (:desire motivation) percept-score))
     motivation))
 
@@ -92,6 +92,6 @@
   "Create a satisfaction vector from a sequence of motivations with each key in the satisfaction vector being the motivation name and the value being the associated desire score"
   [motivations]
   (->> motivations
-       (map (juxt :name :desire))
+       (map (juxt :id :desire))
        (map (partial apply hash-map))
        (apply merge-with concat)))

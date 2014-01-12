@@ -3,7 +3,7 @@
             [emotions.util :refer :all]
             [expectations :refer :all]))
 
-(def hunger {:name :hunger, :desire 0.0, :decay-rate 0.1, :max-change 0.3,
+(def hunger {:id :hunger, :desire 0.0, :decay-rate 0.1, :max-change 0.3,
              :layer :physical})
 
 (def percept {:satisfaction-vector {:hunger 0.5, :survival 0.0}})
@@ -12,7 +12,7 @@
 (expect {:desire 0.1} (in (decay-motivation {:desire 0.0, :decay-rate 0.1})))
 
 ;; decay all motivations should decay each motivation in a sequence
-(expect [{:name :hunger, :desire 0.1, :decay-rate 0.1,
+(expect [{:id :hunger, :desire 0.1, :decay-rate 0.1,
           :max-change 0.3, :layer :physical}]
         (decay-all-motivations [hunger]))
 
@@ -21,7 +21,7 @@
 (expect {:desire 0.5} (in (add-percept hunger percept)))
 
 ;; add-percepts should add all percepts to all motivations
-(expect [{:name :hunger, :desire 0.5, :decay-rate 0.1,
+(expect [{:id :hunger, :desire 0.5, :decay-rate 0.1,
           :max-change 0.3, :layer :physical}]
         (add-percepts [hunger] [percept]))
 
@@ -93,18 +93,18 @@
 
 ;; in a timestep without percepts all motivations should just decay
 ;; commented out because of failing float comparison
-;(expect [{:name :hunger, :desire 0.4, :last-desire 0.1, :decay-rate 0.3}
-;         {:name :happiness, :desire 0.7, :last-desire 0.5, :decay-rate 0.2}
-;         {:name :survival, :desire 0.3, :last-desire 0.2, :decay-rate 0.1}]
-;(update-motivations [{:name :hunger, :desire 0.1, :decay-rate 0.3}
-;                     {:name :happiness, :desire 0.5, :decay-rate 0.2}
-;                     {:name :survival, :desire 0.2, :decay-rate 0.1}]
+;(expect [{:id :hunger, :desire 0.4, :last-desire 0.1, :decay-rate 0.3}
+;         {:id :happiness, :desire 0.7, :last-desire 0.5, :decay-rate 0.2}
+;         {:id :survival, :desire 0.3, :last-desire 0.2, :decay-rate 0.1}]
+;(update-motivations [{:id :hunger, :desire 0.1, :decay-rate 0.3}
+;                     {:id :happiness, :desire 0.5, :decay-rate 0.2}
+;                     {:id :survival, :desire 0.2, :decay-rate 0.1}]
 ;                    []))
 
 ;; should be able to create a satisfaction vector from a sequence
 ;; of motivations with each key in the satisfaction vector being
 ;; the motivation name and the value being the associated desire score
 (expect {:hunger 0.1, :happiness 0.5, :survival 0.2}
-        (in (motivations->sv [{:name :hunger, :desire 0.1}
-                              {:name :happiness, :desire 0.5}
-                              {:name :survival, :desire 0.2}])))
+        (in (motivations->sv [{:id :hunger, :desire 0.1}
+                              {:id :happiness, :desire 0.5}
+                              {:id :survival, :desire 0.2}])))
