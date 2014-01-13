@@ -108,3 +108,7 @@
         (in (motivations->sv [{:id :hunger, :desire 0.1}
                               {:id :happiness, :desire 0.5}
                               {:id :survival, :desire 0.2}])))
+
+;; should return a map of layer id to normalised desire score
+;; desire scores should be normalised by number of motivations in
+;; each layer

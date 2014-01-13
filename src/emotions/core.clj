@@ -95,3 +95,8 @@
        (map (juxt :id :desire))
        (map (partial apply hash-map))
        (apply merge-with concat)))
+
+(defn motivations->layer-scores
+  "Return the normalised desire scores for each layer"
+  [motivations]
+  nil)
