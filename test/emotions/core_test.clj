@@ -118,3 +118,8 @@
                {:id :happiness, :desire 0.5, :layer :two }
                {:id :survival, :desire 0.2, :layer :three}]))
 )
+
+(expect {:physical 3}
+        (in (motivations->layer-scores
+             [{:id :hunger, :desire 4, :layer :physical}
+              {:id :survival, :desire 2, :layer :physical}])))
