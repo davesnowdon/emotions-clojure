@@ -112,3 +112,9 @@
 ;; should return a map of layer id to normalised desire score
 ;; desire scores should be normalised by number of motivations in
 ;; each layer
+(expect {:one 0.1, :two 0.5, :three 0.2}
+        (in (motivations->layer-scores
+             [ {:id :hunger, :desire 0.1, :layer :one}
+               {:id :happiness, :desire 0.5, :layer :two }
+               {:id :survival, :desire 0.2, :layer :three}]))
+)

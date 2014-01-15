@@ -99,4 +99,12 @@
 (defn motivations->layer-scores
   "Return the normalised desire scores for each layer"
   [motivations]
-  nil)
+  (let [layer-totals (->> motivations
+                          (map (juxt :layer :desire))
+                          (map (partial apply hash-map))
+                          (apply merge-with +))
+        layer-counts (frequencies (map :layer motivations))]
+    (->> (map #(hash-map %  (/ (layer-totals %)
+                               (layer-counts %)))
+              (keys layer-counts))
+         (apply merge-with concat))))
