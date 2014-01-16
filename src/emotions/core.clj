@@ -105,3 +105,8 @@
                           (apply merge-with +))
         layer-counts (frequencies (map :layer motivations))]
     (merge-with / layer-totals layer-counts)))
+
+(defn scale-layer-scores
+  "Takes an ordered list of layers from most inhibitory to least and a map of layers to normalised motivation and a scaling factor. Returns a map with the scaling factor to apply to each layer"
+  [layers layer-scores scale]
+  (update-values layer-scores * scale))

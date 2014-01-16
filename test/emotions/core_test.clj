@@ -1,6 +1,7 @@
 (ns emotions.core-test
   (:require [emotions.core :refer :all]
             [emotions.util :refer :all]
+            [emotions.motivations :refer :all]
             [expectations :refer :all]))
 
 (def hunger {:id :hunger, :desire 0.0, :decay-rate 0.1, :max-change 0.3,
@@ -123,3 +124,19 @@
         (in (motivations->layer-scores
              [{:id :hunger, :desire 4, :layer :physical}
               {:id :survival, :desire 2, :layer :physical}])))
+
+;; given an ordered list of layers from most inhibitory to least and
+;; a map of layers to normalised motivation and a scaling factor
+;; should return a map with the scaling factor to apply to each layer
+(expect (float= 0.05
+                (:physical
+                 (scale-layer-scores
+                  [:physical :safety :social :values :contribution]
+                  {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}
+                  0.1))))
+(expect (float= 0.04
+                (:safety
+                 (scale-layer-scores
+                  [:physical :safety :social :values :contribution]
+                  {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}
+                  0.1))))
