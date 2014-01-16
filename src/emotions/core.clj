@@ -104,7 +104,4 @@
                           (map (partial apply hash-map))
                           (apply merge-with +))
         layer-counts (frequencies (map :layer motivations))]
-    (->> (map #(hash-map %  (/ (layer-totals %)
-                               (layer-counts %)))
-              (keys layer-counts))
-         (apply merge-with concat))))
+    (merge-with / layer-totals layer-counts)))
