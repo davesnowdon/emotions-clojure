@@ -4,7 +4,7 @@
             [emotions.motivations :refer :all]
             [expectations :refer :all]))
 
-(def hunger {:id :hunger, :desire 0.0, :decay-rate 0.1, :max-change 0.3,
+(def hunger {:id :hunger, :desire 0.0, :decay-rate 0.1, :max-delta 0.3,
              :layer :physical})
 
 (def percept {:satisfaction-vector {:hunger 0.5, :survival 0.0}})
@@ -14,7 +14,7 @@
 
 ;; decay all motivations should decay each motivation in a sequence
 (expect [{:id :hunger, :desire 0.1, :decay-rate 0.1,
-          :max-change 0.3, :layer :physical}]
+          :max-delta 0.3, :layer :physical}]
         (decay-all-motivations [hunger]))
 
 ;; adding a percept should modify the motivations desire by the value in the
@@ -23,7 +23,7 @@
 
 ;; add-percepts should add all percepts to all motivations
 (expect [{:id :hunger, :desire 0.5, :decay-rate 0.1,
-          :max-change 0.3, :layer :physical}]
+          :max-delta 0.3, :layer :physical}]
         (add-percepts [hunger] [percept]))
 
 ;; check that we save the value of desire when starting an update
@@ -50,47 +50,47 @@
 ;; if motivation does not define :max-desire default of 1.0 should be used
 (expect {:desire 1.0} (in (limit-desire-to-range {:desire 2})))
 
-;; desire should not change if it has changed less than :max-change
+;; desire should not change if it has changed less than :max-delta
 (expect {:desire 0.5} (in (limit-desire-change {:desire 0.5
                                                 :last-desire 0.4
-                                                :max-change 0.3})))
+                                                :max-delta 0.3})))
 
-;; desire should be limited to not increasing by more than :max-change
+;; desire should be limited to not increasing by more than :max-delta
 (expect (float= 0.7
                 (:desire (limit-desire-change {:desire 0.9
                                                :last-desire 0.4
-                                               :max-change 0.3}))))
+                                               :max-delta 0.3}))))
 
 ;; desire should be limited to not decreasing by more than max change
 (expect (float= 0.1
                 (:desire (limit-desire-change {:desire 0.0
                                                :last-desire 0.4
-                                               :max-change 0.3}))))
+                                               :max-delta 0.3}))))
 
 ;; max-change should be incremented when desire changes more than max-change
 (expect (< 0.3
-           (:max-change (limit-desire-change {:desire 0.9
+           (:max-delta (limit-desire-change {:desire 0.9
                                               :last-desire 0.4
-                                              :max-change 0.3}))))
+                                              :max-delta 0.3}))))
 
 (expect (< 0.3
-           (:max-change (limit-desire-change {:desire 0.0
+           (:max-delta (limit-desire-change {:desire 0.0
                                               :last-desire 0.4
-                                              :max-change 0.3}))))
+                                              :max-delta 0.3}))))
 
 ;; if defined, max-change-delta from motivation should be used to
 ;; adjust max-change
 (expect (< 0.32
-           (:max-change (limit-desire-change {:desire 0.9
+           (:max-delta (limit-desire-change {:desire 0.9
                                               :last-desire 0.4
-                                              :max-change 0.3
-                                              :max-change-delta 0.3}))))
+                                              :max-delta 0.3
+                                              :max-delta-delta 0.3}))))
 
 (expect (< 0.32
-           (:max-change (limit-desire-change {:desire 0.0
+           (:max-delta (limit-desire-change {:desire 0.0
                                               :last-desire 0.4
-                                              :max-change 0.3
-                                              :max-change-delta 0.3}))))
+                                              :max-delta 0.3
+                                              :max-delta-delta 0.3}))))
 
 ;; in a timestep without percepts all motivations should just decay
 ;; commented out because of failing float comparison

@@ -47,19 +47,19 @@
      :else motivation)))
 
 (defn limit-desire-change
-  "Restrict change in desire to be within :max-change"
+  "Restrict change in desire to be within :max-delta"
   [motivation]
   (let [desire (:desire motivation)
         last-desire (:last-desire motivation)
-        max-change (:max-change motivation default-max-change)
-        max-change-delta (:max-change-delta motivation default-max-change-delta)
+        max-change (:max-delta motivation default-max-change)
+        max-change-delta (:max-delta-delta motivation default-max-change-delta)
         change (- desire last-desire)]
     (if (> (Math/abs change) max-change)
       (if (neg? change)
         (assoc motivation :desire (- last-desire max-change)
-                          :max-change (+ max-change max-change-delta))
+                          :max-delta (+ max-change max-change-delta))
         (assoc motivation :desire (+ last-desire max-change)
-                          :max-change (+ max-change max-change-delta)))
+                          :max-delta (+ max-change max-change-delta)))
       motivation)))
 
 (defn start-update
