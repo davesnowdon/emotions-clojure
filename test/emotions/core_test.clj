@@ -127,16 +127,62 @@
 
 ;; given an ordered list of layers from most inhibitory to least and
 ;; a map of layers to normalised motivation and a scaling factor
-;; should return a map with the scaling factor to apply to each layer
-(expect (float= 0.05
-                (:physical
-                 (scale-layer-scores
-                  [:physical :safety :social :values :contribution]
-                  {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}
-                  0.1))))
-(expect (float= 0.04
+;; should return a map in which each entry is a scaling factor to
+;; apply to the motivations from each layer
+;; the most inhibitory layer should have a scaling factor of 1.0,
+;; the next should have a value inversely proportional to that of
+;; the most inhibitory layer, the next inversely proportional to the
+;; two preceeing layers and so on.
+;; physical -> 1.0
+;; safety -> 0.5
+;; social -> 0.1
+;; values -> 0.0
+;; contribution -> 0.0
+(let [layers [:physical :safety :social :values :contribution]
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}]
+  (expect (float= 1.0
+                  (:physical
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.5
+                  (:safety
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.1
+                  (:social
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.0
+                  (:values
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.0
+                  (:contribution
+                   (scale-layer-scores layers scores)))))
+
+;; a layer with a zero score should not inhibit
+(expect (float= 1.0
                 (:safety
                  (scale-layer-scores
                   [:physical :safety :social :values :contribution]
-                  {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}
-                  0.1))))
+                  {:physical 0.0 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}))))
+
+;; reversing the order of layers should reverse the order of scaling
+;; physical -> 1.0
+;; safety -> 0.5
+;; social -> 0.1
+;; values -> 0.0
+;; contribution -> 0.0
+(let [layers [:contribution :values :social :safety :physical]
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}]
+  (expect (float= 0.0
+                  (:physical
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.4
+                  (:safety
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.7
+                  (:social
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.9
+                  (:values
+                   (scale-layer-scores layers scores))))
+  (expect (float= 1.0
+                  (:contribution
+                   (scale-layer-scores layers scores)))))

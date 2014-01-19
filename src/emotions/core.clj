@@ -108,5 +108,14 @@
 
 (defn scale-layer-scores
   "Takes an ordered list of layers from most inhibitory to least and a map of layers to normalised motivation and a scaling factor. Returns a map with the scaling factor to apply to each layer"
-  [layers layer-scores scale]
-  (update-values layer-scores * scale))
+  [layers layer-scores]
+  (loop [remaining layers
+         scale 1.0
+         accum {}]
+    (if (seq remaining)
+      (let [layer (first remaining)
+            score (layer-scores layer)
+            tmp (- scale score)
+            new-scale (if (> tmp 0.0) tmp 0.0)]
+        (recur (rest remaining) new-scale (assoc accum layer scale)))
+      accum)))
