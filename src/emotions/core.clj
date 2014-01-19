@@ -146,3 +146,15 @@
                        (bounded- max-delta adjustment adjustment))
                 m)))]
     (map adjust-m motivations)))
+
+(defn percepts->motivations+sv
+  "Given a sequence of percepts update the motivations and generate the corresponding satisfaction vector. Returns a vector containing the new motivations sequence as the first element and the satisfaction vector as the second element"
+  [layers motivations percepts]
+  (let [pm (update-motivations percepts)
+        sv (motivations->sv pm)
+        ls (motivations->layer-scores pm)
+        m2l (motivations->layers pm)
+        isv1 (inhibit (reverse layers) ls m2l sv)
+        isv2 (inhibit layers ls m2l isv1)
+        pma (adjust-max-deltas pm isv2 default-max-change-delta)]
+    [pma isv2]))
