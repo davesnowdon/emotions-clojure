@@ -12,3 +12,11 @@
   "Apply a function to each value of a map"
   [m f & args]
  (reduce (fn [r [k v]] (assoc r k (apply f v args))) {} m))
+
+(defn bounded-
+  "Subtracts the second argument from the first argument and returns the result unless it is smaller than min value in which case min-value is returned"
+  [a b min-value]
+  (let [result (- a b)]
+    (if (< result min-value)
+      min-value
+      result)))

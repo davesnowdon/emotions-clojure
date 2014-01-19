@@ -121,8 +121,7 @@
     (if (seq remaining)
       (let [layer (first remaining)
             score (layer-scores layer)
-            tmp (- scale score)
-            new-scale (if (> tmp 0.0) tmp 0.0)]
+            new-scale (bounded- scale score 0.0)]
         (recur (rest remaining) new-scale (assoc accum layer scale)))
       accum)))
 
@@ -133,3 +132,17 @@
     (letfn [(new-desire [k v] (* v (scales (motivations2layers k))))]
       (reduce (fn [r [k v]] (assoc r k (new-desire k v))) {}
               satisfaction-vector))))
+
+(defn adjust-max-deltas
+  "Reduce the max delta of all motivations where the final score after inhibition is less than the raw desire value from the motivation"
+  [motivations inhibited-sv adjustment]
+  (letfn [(adjust-m [m]
+            (let [id (:id m)
+                  desire (:desire m)
+                  max-delta (:max-delta m)
+                  i-desire (inhibited-sv id)]
+              (if (< i-desire desire)
+                (assoc m :max-delta
+                       (bounded- max-delta adjustment adjustment))
+                m)))]
+    (map adjust-m motivations)))

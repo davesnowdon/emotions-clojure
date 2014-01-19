@@ -216,3 +216,21 @@
   (expect (float= 1.0
                   (:contrib-love
                    (inhibit layers scores m2l sv)))))
+
+;; given a satisfaction vector with a desire lower than in the motivation
+;; the max-delta of the motivation should be reduced by adjustment
+(let [motivations [{:id :hunger, :desire 0.6, :decay-rate 0.1,
+                    :max-delta 0.3, :layer :physical}]
+      sv { :hunger 0.5}]
+  (expect (float= 0.29 (:max-delta
+                       (first
+                        (adjust-max-deltas motivations sv 0.01))))))
+
+;; given a satisfaction vector with a desire that has not been inhibited
+;; the motivation's max-delta should not changed
+(let [motivations [{:id :hunger, :desire 0.6, :decay-rate 0.1,
+                    :max-delta 0.3, :layer :physical}]
+      sv { :hunger 0.6}]
+  (expect (float= 0.30 (:max-delta
+                       (first
+                        (adjust-max-deltas motivations sv 0.01))))))
