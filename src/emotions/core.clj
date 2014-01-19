@@ -106,6 +106,12 @@
         layer-counts (frequencies (map :layer motivations))]
     (merge-with / layer-totals layer-counts)))
 
+(defn motivations->layers
+  "Given a sequence of motivations return a map from motivation id to layer id"
+  [motivations]
+  (letfn [(add-layer [a m] (assoc a (:id m) (:layer m)))]
+    (reduce add-layer {} motivations)))
+
 (defn scale-layer-scores
   "Takes an ordered list of layers from most inhibitory to least and a map of layers to normalised motivation and a scaling factor. Returns a map with the scaling factor to apply to each layer"
   [layers layer-scores]
@@ -119,3 +125,11 @@
             new-scale (if (> tmp 0.0) tmp 0.0)]
         (recur (rest remaining) new-scale (assoc accum layer scale)))
       accum)))
+
+(defn inhibit
+  "Given an ordered sequence of layers, layer scores, a map from motivation to layer and a satisfaction vector return a satisfaction vector with the values modified according to the inhibiting factor of each layer"
+  [layers layer-scores motivations2layers satisfaction-vector]
+  (let [scales (scale-layer-scores layers layer-scores)]
+    (letfn [(new-desire [k v] (* v (scales (motivations2layers k))))]
+      (reduce (fn [r [k v]] (assoc r k (new-desire k v))) {}
+              satisfaction-vector))))

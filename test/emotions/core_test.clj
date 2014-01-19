@@ -110,6 +110,16 @@
                               {:id :happiness, :desire 0.5}
                               {:id :survival, :desire 0.2}])))
 
+;; should generate a map of motivation id to layer id from sequence
+;; of motivations
+(expect {:hunger :one, :happiness :two, :survival :three}
+        (in
+         (motivations->layers
+          [ {:id :hunger, :desire 0.1, :layer :one}
+            {:id :happiness, :desire 0.5, :layer :two }
+            {:id :survival, :desire 0.2, :layer :three}])))
+
+
 ;; should return a map of layer id to normalised desire score
 ;; desire scores should be normalised by number of motivations in
 ;; each layer
@@ -164,11 +174,6 @@
                   {:physical 0.0 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}))))
 
 ;; reversing the order of layers should reverse the order of scaling
-;; physical -> 1.0
-;; safety -> 0.5
-;; social -> 0.1
-;; values -> 0.0
-;; contribution -> 0.0
 (let [layers [:contribution :values :social :safety :physical]
       scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}]
   (expect (float= 0.0
@@ -186,3 +191,28 @@
   (expect (float= 1.0
                   (:contribution
                    (scale-layer-scores layers scores)))))
+
+;; given an ordered sequence of layers, layer scores, map from
+;; motivation to layer satisfaction  vector the motivation values
+;; should be inhibited according to the normalised scores of each layer
+(let [layers [:contribution :values :social :safety :physical]
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}
+      m2l {:phys-anger :physical, :phys-fear :physical,
+           :saf-rage :safety, :saf-playful :safety,
+           :soc-pride :social, :soc-jealousy :social,
+           :val-courage :values, :val-victory :values,
+           :contrib-wrath :contribution, :contrib-love :contribution}
+      sv {:phys-anger 0.1, :phys-fear 0.0,
+          :saf-rage 0.1, :saf-playful 0.5,
+          :soc-pride 0.5, :soc-jealousy 0.0,
+          :val-courage 0.6, :val-victory 0.2,
+          :contrib-wrath 0.0, :contrib-love 1.0}]
+  (expect (float= 0.0
+                  (:phys-anger
+                   (inhibit layers scores m2l sv))))
+  (expect (float= 0.54
+                  (:val-courage
+                   (inhibit layers scores m2l sv))))
+  (expect (float= 1.0
+                  (:contrib-love
+                   (inhibit layers scores m2l sv)))))
