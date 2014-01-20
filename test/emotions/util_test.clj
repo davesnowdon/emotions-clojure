@@ -7,3 +7,7 @@
 
 ;; if result is less than min-value, shoudl return min-value
 (expect (float= 0.1 (bounded- 4.5 4.45 0.1)))
+
+;; zero values should be removed from a map
+(expect {:joy 0.5 :hunger 0.2}
+        (in (strip-zero {:joy 0.5 :anger 0.0 :hunger 0.2 :envy 0})))

@@ -20,3 +20,11 @@
     (if (< result min-value)
       min-value
       result)))
+
+(defn strip-zero
+  "Removes items from a map where the value is zero"
+  [m]
+  (->> m
+       (filter (fn [[k v]] (not (float= 0.0 v))))
+       (map (partial apply hash-map))
+       (apply merge-with concat)))
