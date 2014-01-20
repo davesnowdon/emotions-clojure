@@ -158,3 +158,8 @@
         isv2 (inhibit layers ls m2l isv1)
         pma (adjust-max-deltas pm isv2 default-max-change-delta)]
     [pma isv2]))
+
+(defn sv->valence+arousal
+  "Calculate the valence and arousal scores for a given satisfaction vector"
+  [sv]
+  {:valence 0.0 :arousal 0.0})
