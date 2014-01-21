@@ -234,3 +234,28 @@
   (expect (float= 0.30 (:max-delta
                        (first
                         (adjust-max-deltas motivations sv 0.01))))))
+
+;; a satisfaction vector that perfectly matches an expression vector
+;; should return 0.0
+(expect (float= 0.0 (expression-vector-distance
+                     {:hunger 1.0 :survival 0.5 :joy 0.3}
+                     {:hunger 1.0 :survival 0.5 :joy 0.3})))
+
+;; a satisfaction vector that perfectly matches all the defined
+;; values in an expression vector should return zero
+(expect (float= 0.0 (expression-vector-distance
+                     {:survival 0.5 :joy 0.3}
+                     {:hunger 1.0 :survival 0.5 :joy 0.3})))
+
+;; a satisfaction vector that is the opposite of an expression vector
+;; should return 1.0
+(expect (float= 1.0 (expression-vector-distance
+                     {:hunger 1.0 :survival 1.0 :joy 1.0}
+                     {:hunger 0.0 :survival 0.0 :joy 0.0})))
+
+;; expression-vector-distance should return the normalised distance
+;; between an sv and an ev
+(expect (float= (/  (+ (- 0.8 0.5) (- 0.4 0.2)) 2)
+                (expression-vector-distance
+                 {:hunger 0.8 :survival 0.2}
+                 {:hunger 0.5 :survival 0.4 :joy 0.5})))

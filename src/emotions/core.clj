@@ -159,6 +159,12 @@
         pma (adjust-max-deltas pm isv2 default-max-change-delta)]
     [pma isv2]))
 
+(defn expression-vector-distance
+  "Returns value from 0.0 to 1.0 representing the similarity between an expression vector and a satisfaction vector. A value of 0.0 indicates a perfect match"
+  [ev sv]
+  (letfn [(sv-diff [a [k v]] (+ a  (Math/abs (- v (sv k)))))]
+    (/ (reduce sv-diff 0.0 ev) (count ev))))
+
 (defn sv->valence+arousal
   "Calculate the valence and arousal scores for a given satisfaction vector"
   [sv]
