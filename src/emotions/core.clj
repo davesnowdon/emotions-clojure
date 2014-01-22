@@ -166,19 +166,18 @@
 (defn expression-vector-distance
   "Returns value from 0.0 to 1.0 representing the similarity between an expression vector and a satisfaction vector. A value of 0.0 indicates a perfect match"
   [ev sv]
-  (letfn [(sv-diff [a [k v]] (+ a  (Math/abs (- v (sv k)))))]
+  (letfn [(sv-diff [a [k v]] (+ a  (if (nil? (sv k)) 1.0 (Math/abs (- v (sv k))))))]
     (/ (reduce sv-diff 0.0 ev) (count ev))))
 
 (defn sv->valence+arousal
   "Calculate the valence and arousal scores for a given satisfaction vector"
   [control-points sv]
   (letfn [(add-dist [cp]
-            (assoc cp :distance
-                   (expression-vector-distance
-                    (:expression-vector cp) sv)))
-          (ord-val [k acc cp] (+ acc (* (- 1.0 (:distance cp)) (cp k))))]
+            (let [dist (expression-vector-distance (:expression-vector cp) sv)]
+              (assoc cp :distance dist :weight (- 1.0 dist))))
+          (ord-val [k acc cp] (+ acc (* (:weight cp) (cp k))))]
     (let [with-dist (map add-dist control-points)
           valence (reduce (partial ord-val :valence) 0.0 with-dist)
           arousal (reduce (partial ord-val :arousal) 0.0 with-dist)
-          num-cp (count control-points)]
-      {:valence (/ valence num-cp) :arousal (/ arousal num-cp)})))
+          total-weight (reduce (fn [acc cp] (+ acc (:weight cp))) 0.0 with-dist)]
+      {:valence (/ valence total-weight) :arousal (/ arousal total-weight)})))
