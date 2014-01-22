@@ -7,6 +7,10 @@
 
 ;; percepts are maps with a key :satisfaction-vector
 
+;; control points map motivation threshold scores (called an
+;; expression vector) to points in valence/arousal space
+;; control point {:valence 1.0 :arousal 1.0 :expression-vector {} }
+
 ;; define default range for motivation desire values
 (def default-min-desire 0.0)
 (def default-max-desire 1.0)
@@ -167,5 +171,14 @@
 
 (defn sv->valence+arousal
   "Calculate the valence and arousal scores for a given satisfaction vector"
-  [sv]
-  {:valence 0.0 :arousal 0.0})
+  [control-points sv]
+  (letfn [(add-dist [cp]
+            (assoc cp :distance
+                   (expression-vector-distance
+                    (:expression-vector cp) sv)))
+          (ord-val [k acc cp] (+ acc (* (- 1.0 (:distance cp)) (cp k))))]
+    (let [with-dist (map add-dist control-points)
+          valence (reduce (partial ord-val :valence) 0.0 with-dist)
+          arousal (reduce (partial ord-val :arousal) 0.0 with-dist)
+          num-cp (count control-points)]
+      {:valence (/ valence num-cp) :arousal (/ arousal num-cp)})))

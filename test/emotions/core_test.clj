@@ -259,3 +259,27 @@
                 (expression-vector-distance
                  {:hunger 0.8 :survival 0.2}
                  {:hunger 0.5 :survival 0.4 :joy 0.5})))
+
+;; if there is no overlap between an expression vector and satisfaction
+;; vector should return 1.0
+(expect (float= 1.0 (expression-vector-distance
+                     {:love 1.0 :hate 1.0}
+                     {:hunger 0.0 :survival 0.0 :joy 0.0})))
+
+;; one control point that perfectly matches should return it's
+;; arousal / valence coordinates
+(let [cp [ {:valence -1 :arousal 1
+            :expression-vector {:survival 0.5 :joy 0.3}}]
+      sv {:hunger 1.0 :survival 0.5 :joy 0.3}]
+  (expect (float= -1.0 (:valence (sv->valence+arousal cp sv))))
+  (expect (float= 1.0 (:arousal (sv->valence+arousal cp sv)))))
+
+;; a control point that does not match should not influence the
+;; valence arousal
+(let [cp [ {:valence -1 :arousal 1
+            :expression-vector {:survival 0.5 :joy 0.3}}
+           {:valence 1 :arousal -1
+            :expression-vector {:love 0.5 :hate 0.3}}]
+      sv {:hunger 1.0 :survival 0.5 :joy 0.3}]
+  (expect (float= -1.0 (:valence (sv->valence+arousal cp sv))))
+  (expect (float= 1.0 (:arousal (sv->valence+arousal cp sv)))))
