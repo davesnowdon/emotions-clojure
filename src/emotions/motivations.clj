@@ -1,7 +1,7 @@
 (ns emotions.motivations)
 
 ; layers from bottom to top
-(def layers [:physical :safety :social :values :contribution])
+(def layers [:physical :safety :social :skill :contribution])
 
 ;; valence and arousal for motivations organised by layers
 (def default-motivations
@@ -42,19 +42,19 @@
    {:id :soc-accepted :name "accepted" :layer :social :valence 0.6 :arousal -0.4}
    {:id :soc-lonely :name "lonely" :layer :social :valence -0.6 :arousal -0.6}
    {:id :soc-humility :name "humility" :layer :social :valence 0.4 :arousal -0.6},
-   {:id :val-revenge :name "revenge" :layer :values :valence -0.7 :arousal 0.8}
-   {:id :val-courage :name "courage" :layer :values :valence 0.2 :arousal 0.8}
-   {:id :val-victory :name "victory" :layer :values :valence 0.6 :arousal 0.75}
-   {:id :val-arrogance :name "arrogance" :layer :values :valence -0.1 :arousal 0.6}
-   {:id :val-revulsion :name "revulsion" :layer :values :valence -0.7 :arousal 0.5}
-   {:id :val-significance :name "significance" :layer :values :valence 0.6 :arousal 0.55}
-   {:id :val-honour :name "honour" :layer :values :valence 0.1 :arousal 0.3}
-   {:id :val-attainment :name "attainment" :layer :values :valence 0.6 :arousal 0.2}
-   {:id :val-useless :name "useless" :layer :values :valence -0.6 :arousal -0.1}
-   {:id :val-pity :name "pity" :layer :values :valence -0.1 :arousal -0.4}
-   {:id :val-guilt :name "guilt" :layer :values :valence -0.8 :arousal -0.5}
-   {:id :val-fulfilled :name "fulfilled" :layer :values :valence 0.6 :arousal -0.5}
-   {:id :val-remorse :name "remorse" :layer :values :valence -0.7 :arousal -0.7},
+   {:id :skill-revenge :name "revenge" :layer :skill :valence -0.7 :arousal 0.8}
+   {:id :skill-courage :name "courage" :layer :skill :valence 0.2 :arousal 0.8}
+   {:id :skill-victory :name "victory" :layer :skill :valence 0.6 :arousal 0.75}
+   {:id :skill-arrogance :name "arrogance" :layer :skill :valence -0.1 :arousal 0.6}
+   {:id :skill-revulsion :name "revulsion" :layer :skill :valence -0.7 :arousal 0.5}
+   {:id :skill-significance :name "significance" :layer :skill :valence 0.6 :arousal 0.55}
+   {:id :skill-honour :name "honour" :layer :skill :valence 0.1 :arousal 0.3}
+   {:id :skill-attainment :name "attainment" :layer :skill :valence 0.6 :arousal 0.2}
+   {:id :skill-useless :name "useless" :layer :skill :valence -0.6 :arousal -0.1}
+   {:id :skill-pity :name "pity" :layer :skill :valence -0.1 :arousal -0.4}
+   {:id :skill-guilt :name "guilt" :layer :skill :valence -0.8 :arousal -0.5}
+   {:id :skill-fulfilled :name "fulfilled" :layer :skill :valence 0.6 :arousal -0.5}
+   {:id :skill-remorse :name "remorse" :layer :skill :valence -0.7 :arousal -0.7},
    {:id :contrib-wrath :name "wrath" :layer :contribution :valence -0.9 :arousal 0.9}
    {:id :contrib-joy :name "joy" :layer :contribution :valence 0.8 :arousal 0.85}
    {:id :contrib-love :name "love" :layer :contribution :valence 0.8 :arousal 0.5}

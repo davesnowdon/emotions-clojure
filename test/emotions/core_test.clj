@@ -148,8 +148,8 @@
 ;; social -> 0.1
 ;; values -> 0.0
 ;; contribution -> 0.0
-(let [layers [:physical :safety :social :values :contribution]
-      scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}]
+(let [layers [:physical :safety :social :skill :contribution]
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}]
   (expect (float= 1.0
                   (:physical
                    (scale-layer-scores layers scores))))
@@ -160,7 +160,7 @@
                   (:social
                    (scale-layer-scores layers scores))))
   (expect (float= 0.0
-                  (:values
+                  (:skill
                    (scale-layer-scores layers scores))))
   (expect (float= 0.0
                   (:contribution
@@ -170,12 +170,12 @@
 (expect (float= 1.0
                 (:safety
                  (scale-layer-scores
-                  [:physical :safety :social :values :contribution]
-                  {:physical 0.0 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}))))
+                  [:physical :safety :social :skill :contribution]
+                  {:physical 0.0 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}))))
 
 ;; reversing the order of layers should reverse the order of scaling
-(let [layers [:contribution :values :social :safety :physical]
-      scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}]
+(let [layers [:contribution :skill :social :safety :physical]
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}]
   (expect (float= 0.0
                   (:physical
                    (scale-layer-scores layers scores))))
@@ -186,7 +186,7 @@
                   (:social
                    (scale-layer-scores layers scores))))
   (expect (float= 0.9
-                  (:values
+                  (:skill
                    (scale-layer-scores layers scores))))
   (expect (float= 1.0
                   (:contribution
@@ -195,12 +195,12 @@
 ;; given an ordered sequence of layers, layer scores, map from
 ;; motivation to layer satisfaction  vector the motivation values
 ;; should be inhibited according to the normalised scores of each layer
-(let [layers [:contribution :values :social :safety :physical]
-      scores {:physical 0.5 :safety 0.4 :social 0.3 :values 0.2 :contribution 0.1}
+(let [layers [:contribution :skill :social :safety :physical]
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}
       m2l {:phys-anger :physical, :phys-fear :physical,
            :saf-rage :safety, :saf-playful :safety,
            :soc-pride :social, :soc-jealousy :social,
-           :val-courage :values, :val-victory :values,
+           :val-courage :skill, :val-victory :skill,
            :contrib-wrath :contribution, :contrib-love :contribution}
       sv {:phys-anger 0.1, :phys-fear 0.0,
           :saf-rage 0.1, :saf-playful 0.5,
