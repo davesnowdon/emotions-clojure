@@ -1,8 +1,8 @@
-(defproject emotions "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+(defproject emotions "0.1.0"
+  :description "Clojure implementation of an emotional model for autonomous agents"
+  :url "https://github.com/davesnowdon/emotions-clojure"
+  :license {:name "LGPL v2.1"
+            :url "http://www.gnu.org/licenses/lgpl-2.1.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [expectations "1.4.56"]]
   :profile {:dev {:dependencies [[expectations "1.4.56"]]}}
