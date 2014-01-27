@@ -86,7 +86,7 @@
           (display-sv sv)
           (if (continue-demo?)
             (let [percepts (select-percepts)
-                  [new-sv new-motivations]
+                  [new-motivations new-sv]
                   (percepts->motivations+sv layers motivations percepts)]
               (recur new-sv new-motivations))))))))
 
