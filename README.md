@@ -5,6 +5,9 @@ Clojure implementation of emotional model from github.com/davesnowdon/emotions
 
 A model of emotions and motivations for artificial agents inspired by the work of Michael Sellers as described in "Toward a comprehensive theory of emotion for biological and artificial agents" in Biologically Inspired Cognitive Architectures, Volume 4, April 2013, Pages 3–26.
 
+Sellers, M. (2010). Cathexis: An emotional basis for human-like
+learning. Proceedings of the biologically inspired cognitive
+architectures association, 2010, 125–130.
 
 Motivation - roughly analgous to an emotion; processes perceptions and creates a score representing the level of "activation" of this emotion
 
