@@ -1,5 +1,7 @@
 (ns emotions.demo
-  (:require [emotions.core :refer :all]
+  (:require [clojure.string :refer [trim]]
+            [clojure.pprint :refer [pprint]]
+            [emotions.core :refer :all]
             [emotions.util :refer :all]))
 
 ; layers from bottom to top
@@ -11,7 +13,7 @@
     :desire 0.0 :decay-rate 0.1 :max-delta 1.0}
    {:id :phys-fear :name "fear" :layer :physical
     :valence -0.9 :arousal 0.2
-    :desire 0.0 :decay-rate 0.0 :max-delta 1.0}
+    :desire 0.0 :decay-rate -0.2 :max-delta 1.0}
    {:id :saf-bored :name "bored" :layer :safety
     :valence -0.1 :arousal -0.4
     :desire 0.0 :decay-rate 0.1 :max-delta 0.3}
@@ -52,15 +54,45 @@
     {:phys-hunger 0.0 :phys-fear 0.0 :saf-bored 0.0 :saf-delight 0.0 :soc-lonely 0.0}}
    ])
 
+(def demo-percepts
+  [{:name "Falling sensation" :satisfaction-vector
+    {:phys-hunger 0.0 :phys-fear 0.9 :saf-bored 0.0 :saf-delight 0.0 :soc-lonely 0.0}}
+   {:name "See food" :satisfaction-vector
+    {:phys-hunger 0.5 :phys-fear 0.0 :saf-bored 0.0 :saf-delight 0.0 :soc-lonely 0.0}}
+   {:name "Eating food" :satisfaction-vector
+    {:phys-hunger -0.7 :phys-fear 0.0 :saf-bored 0.0 :saf-delight 0.0 :soc-lonely 0.0}}
+   {:name "See person" :satisfaction-vector
+    {:phys-hunger 0.0 :phys-fear 0.1 :saf-bored -0.3 :saf-delight 0.0 :soc-lonely 0.1}}
+   {:name "See friend" :satisfaction-vector
+    {:phys-hunger 0.0 :phys-fear -0.3 :saf-bored -0.3 :saf-delight -0.8 :soc-lonely -0.5}}])
+
+(defn display-percepts
+  [percepts]
+  (do
+    (println "0 - No percepts")
+    (doseq [[i p] (map vector (range 1 (+ (count percepts) 1)) percepts)]
+      (println i " - " (:name p)))))
+
 (defn select-percepts
   "Give the user a list of possible percepts and allow them to choose some"
   []
-  [])
+  (do
+    (display-percepts demo-percepts)
+    (loop [selected []]
+      (let [input (trim (read-line))]
+        (if (and (not= "0" input) (not= "" input)
+                 (<= (Integer. input) (count demo-percepts)))
+          (do
+            (println "Enter 0 to finish or select another percept")
+            (recur (conj selected (nth demo-percepts (- (Integer. input) 1)))))
+          selected)))))
 
 (defn display-sv
   "Display satisfaction vector"
   [sv]
-  (println "SV:" sv))
+  (do
+    (print "SV: ")
+    (pprint sv)))
 
 (defn demo-instructions
   []
@@ -88,7 +120,11 @@
             (let [percepts (select-percepts)
                   [new-motivations new-sv]
                   (percepts->motivations+sv layers motivations percepts)]
-              (recur new-sv new-motivations))))))))
+              (do
+                (println "Applied percepts:")
+                (pprint percepts)
+                (println)
+                (recur new-sv new-motivations)))))))))
 
 (defn -main
   [& args]
