@@ -94,6 +94,12 @@
     (print "SV: ")
     (pprint sv)))
 
+(defn display-valence-arousal
+  ""
+  [sv]
+  (let [{valence :valence arousal :arousal} (sv->valence+arousal demo-control-points sv)]
+    (println "Valence:" valence " Arousal:" arousal)))
+
 (defn demo-instructions
   []
   (println "Select which percepts, or none to show at each time step to see how the satisfaction-vector changes. Selecting no percepts will mean that only motications with a decay rate will change."))
@@ -116,6 +122,7 @@
              motivations demo-motivations]
         (do
           (display-sv sv)
+          (display-valence-arousal sv)
           (if (continue-demo?)
             (let [percepts (select-percepts)
                   [new-motivations new-sv]
