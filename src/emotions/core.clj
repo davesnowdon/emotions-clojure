@@ -154,7 +154,7 @@
 (defn percepts->motivations+sv
   "Given a sequence of percepts update the motivations and generate the corresponding satisfaction vector. Returns a vector containing the new motivations sequence as the first element and the satisfaction vector as the second element"
   [layers motivations percepts]
-  (let [pm (update-motivations percepts)
+  (let [pm (update-motivations motivations percepts)
         sv (motivations->sv pm)
         ls (motivations->layer-scores pm)
         m2l (motivations->layers pm)
