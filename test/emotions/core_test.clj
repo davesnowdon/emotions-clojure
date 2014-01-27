@@ -192,6 +192,43 @@
                   (:contribution
                    (scale-layer-scores layers scores)))))
 
+;; should not throw error if not all layers have scores
+(let [layers [:physical :safety :social :skill :contribution]
+      scores {:physical 0.5 :safety 0.4 :social 0.3}]
+  (expect (float= 1.0
+                  (:physical
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.5
+                  (:safety
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.1
+                  (:social
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.0
+                  (:skill
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.0
+                  (:contribution
+                   (scale-layer-scores layers scores)))))
+
+(let [layers [:contribution :skill :social :safety :physical]
+      scores {:physical 0.5 :safety 0.4 :social 0.3}]
+  (expect (float= 0.3
+                  (:physical
+                   (scale-layer-scores layers scores))))
+  (expect (float= 0.7
+                  (:safety
+                   (scale-layer-scores layers scores))))
+  (expect (float= 1.0
+                  (:social
+                   (scale-layer-scores layers scores))))
+  (expect (float= 1.0
+                  (:skill
+                   (scale-layer-scores layers scores))))
+  (expect (float= 1.0
+                  (:contribution
+                   (scale-layer-scores layers scores)))))
+
 ;; given an ordered sequence of layers, layer scores, map from
 ;; motivation to layer satisfaction  vector the motivation values
 ;; should be inhibited according to the normalised scores of each layer

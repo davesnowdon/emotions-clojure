@@ -124,7 +124,7 @@
          accum {}]
     (if (seq remaining)
       (let [layer (first remaining)
-            score (layer-scores layer)
+            score (layer-scores layer 0.0)
             new-scale (bounded- scale score 0.0)]
         (recur (rest remaining) new-scale (assoc accum layer scale)))
       accum)))
