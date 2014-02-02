@@ -30,7 +30,7 @@
 (defn add-percept
   "Add the from a percept's satisfaction vector with the motivations current desire"
   [motivation percept]
-  (if-let [percept-score ((:id motivation) (:satisfaction-vector percept))]
+  (if-let [percept-score ((:id motivation) (:satisfaction-vector percept) 0.0)]
     (assoc motivation :desire (+ (:desire motivation) percept-score))
     motivation))
 
