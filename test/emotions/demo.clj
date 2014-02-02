@@ -126,7 +126,7 @@
           (if (continue-demo?)
             (let [percepts (select-percepts)
                   [new-motivations new-sv]
-                  (percepts->motivations+sv layers motivations percepts)]
+                  (percepts->motivations+sv layers {} motivations percepts)]
               (do
                 (println "Applied percepts:")
                 (pprint percepts)

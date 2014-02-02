@@ -118,21 +118,24 @@
 
 (defn scale-layer-scores
   "Takes an ordered list of layers from most inhibitory to least and a map of layers to normalised motivation and a scaling factor. Returns a map with the scaling factor to apply to each layer"
-  [layers layer-scores]
+  [layers layer-scores layer-multipliers]
   (loop [remaining layers
          scale 1.0
          accum {}]
     (if (seq remaining)
       (let [layer (first remaining)
+            multiplier (layer-multipliers layer 1.0)
             score (layer-scores layer 0.0)
-            new-scale (bounded- scale score 0.0)]
+            new-scale (bounded- scale (* score multiplier) 0.0)]
         (recur (rest remaining) new-scale (assoc accum layer scale)))
       accum)))
 
 (defn inhibit
   "Given an ordered sequence of layers, layer scores, a map from motivation to layer and a satisfaction vector return a satisfaction vector with the values modified according to the inhibiting factor of each layer"
-  [layers layer-scores motivations2layers satisfaction-vector]
-  (let [scales (scale-layer-scores layers layer-scores)]
+  [layers layer-scores motivations2layers satisfaction-vector layer-multipliers]
+  (let [scales (scale-layer-scores layers layer-scores layer-multipliers)]
+;;    (println "Layer scores" layer-scores)
+;;    (println "Scaled Layer scores" scales)
     (letfn [(new-desire [k v] (* v (scales (motivations2layers k))))]
       (reduce (fn [r [k v]] (assoc r k (new-desire k v))) {}
               satisfaction-vector))))
@@ -153,13 +156,13 @@
 
 (defn percepts->motivations+sv
   "Given a sequence of percepts update the motivations and generate the corresponding satisfaction vector. Returns a vector containing the new motivations sequence as the first element and the satisfaction vector as the second element"
-  [layers motivations percepts]
+  [layers layer-multipliers motivations percepts]
   (let [pm (update-motivations motivations percepts)
         sv (motivations->sv pm)
         ls (motivations->layer-scores pm)
         m2l (motivations->layers pm)
-        isv1 (inhibit (reverse layers) ls m2l sv)
-        isv2 (inhibit layers ls m2l isv1)
+        isv1 (inhibit (reverse layers) ls m2l sv layer-multipliers)
+        isv2 (inhibit layers ls m2l isv1 layer-multipliers)
         pma (adjust-max-deltas pm isv2 default-max-change-delta)]
     [pma isv2]))
 

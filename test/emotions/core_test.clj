@@ -152,82 +152,102 @@
       scores {:physical 0.5 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}]
   (expect (float= 1.0
                   (:physical
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.5
                   (:safety
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.1
                   (:social
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.0
                   (:skill
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.0
                   (:contribution
-                   (scale-layer-scores layers scores)))))
+                   (scale-layer-scores layers scores {})))))
 
 ;; a layer with a zero score should not inhibit
 (expect (float= 1.0
                 (:safety
                  (scale-layer-scores
                   [:physical :safety :social :skill :contribution]
-                  {:physical 0.0 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}))))
+                  {:physical 0.0 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1} {}))))
 
 ;; reversing the order of layers should reverse the order of scaling
 (let [layers [:contribution :skill :social :safety :physical]
       scores {:physical 0.5 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}]
   (expect (float= 0.0
                   (:physical
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.4
                   (:safety
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.7
                   (:social
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.9
                   (:skill
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 1.0
                   (:contribution
-                   (scale-layer-scores layers scores)))))
+                   (scale-layer-scores layers scores {})))))
 
 ;; should not throw error if not all layers have scores
 (let [layers [:physical :safety :social :skill :contribution]
       scores {:physical 0.5 :safety 0.4 :social 0.3}]
   (expect (float= 1.0
                   (:physical
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.5
                   (:safety
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.1
                   (:social
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.0
                   (:skill
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.0
                   (:contribution
-                   (scale-layer-scores layers scores)))))
+                   (scale-layer-scores layers scores {})))))
 
 (let [layers [:contribution :skill :social :safety :physical]
       scores {:physical 0.5 :safety 0.4 :social 0.3}]
   (expect (float= 0.3
                   (:physical
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 0.7
                   (:safety
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 1.0
                   (:social
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 1.0
                   (:skill
-                   (scale-layer-scores layers scores))))
+                   (scale-layer-scores layers scores {}))))
   (expect (float= 1.0
                   (:contribution
-                   (scale-layer-scores layers scores)))))
+                   (scale-layer-scores layers scores {})))))
+
+;; scaling should be modified by layer multilpliers
+(let [layers [:physical :safety :social :skill :contribution]
+      multipliers  {:physical 0.5 :safety 0.5 :social 0.5 :skill 0.5 :contribution 0.5}
+      scores {:physical 0.5 :safety 0.4 :social 0.3 :skill 0.2 :contribution 0.1}]
+  (expect (float= 1.0
+                  (:physical
+                   (scale-layer-scores layers scores multipliers))))
+  (expect (float= 0.75
+                  (:safety
+                   (scale-layer-scores layers scores multipliers))))
+  (expect (float= 0.55
+                  (:social
+                   (scale-layer-scores layers scores multipliers))))
+  (expect (float= 0.4
+                  (:skill
+                   (scale-layer-scores layers scores multipliers))))
+  (expect (float= 0.3
+                  (:contribution
+                   (scale-layer-scores layers scores multipliers)))))
 
 ;; given an ordered sequence of layers, layer scores, map from
 ;; motivation to layer satisfaction  vector the motivation values
@@ -246,13 +266,13 @@
           :contrib-wrath 0.0, :contrib-love 1.0}]
   (expect (float= 0.0
                   (:phys-anger
-                   (inhibit layers scores m2l sv))))
+                   (inhibit layers scores m2l sv {}))))
   (expect (float= 0.54
                   (:val-courage
-                   (inhibit layers scores m2l sv))))
+                   (inhibit layers scores m2l sv {}))))
   (expect (float= 1.0
                   (:contrib-love
-                   (inhibit layers scores m2l sv)))))
+                   (inhibit layers scores m2l sv {})))))
 
 ;; given a satisfaction vector with a desire lower than in the motivation
 ;; the max-delta of the motivation should be reduced by adjustment
