@@ -16,6 +16,9 @@
 (def default-max-desire 1.0)
 (def default-max-change 1.0)
 (def default-max-change-delta 0.01)
+;; how much a motivation has to be inhibited by in order to have
+;; its max-change reduced
+(def default-max-change-threshold 0.05)
 
 (defn decay-motivation
   "Decay a motivation's current desire by the amount of its decay rate"
@@ -148,7 +151,8 @@
                   desire (:desire m)
                   max-delta (:max-delta m)
                   i-desire (inhibited-sv id)]
-              (if (< i-desire desire)
+              (if (> (Math/abs (- desire i-desire))
+                     default-max-change-threshold)
                 (assoc m :max-delta
                        (bounded- max-delta adjustment adjustment))
                 m)))]
