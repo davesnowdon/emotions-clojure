@@ -18,7 +18,7 @@
 (def default-max-change-delta 0.01)
 ;; how much a motivation has to be inhibited by in order to have
 ;; its max-change reduced
-(def default-max-change-threshold 0.05)
+(def default-max-change-threshold 0.1)
 
 (defn decay-motivation
   "Decay a motivation's current desire by the amount of its decay rate"
