@@ -173,8 +173,10 @@
 (defn expression-vector-distance
   "Returns value from 0.0 to 1.0 representing the similarity between an expression vector and a satisfaction vector. A value of 0.0 indicates a perfect match"
   [ev sv]
-  (letfn [(sv-diff [a [k v]] (+ a  (if (nil? (sv k)) 1.0 (Math/abs (- v (sv k))))))]
-    (/ (reduce sv-diff 0.0 ev) (count ev))))
+  (if (> (count ev) 0)
+    (letfn [(sv-diff [a [k v]] (+ a  (if (nil? (sv k)) 1.0 (Math/abs (- v (sv k))))))]
+      (/ (reduce sv-diff 0.0 ev) (count ev)))
+    1.0))
 
 (defn sv->valence+arousal
   "Calculate the valence and arousal scores for a given satisfaction vector"
