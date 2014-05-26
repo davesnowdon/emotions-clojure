@@ -1,11 +1,19 @@
 (ns emotions.core
-  (:require [emotions.util :refer :all]))
+  (:require [emotions.util :refer :all]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 ;; motivations are maps
 
 ;; satisfaction vectors are maps with the motivation name as a key
 
-;; percepts are maps with a key :satisfaction-vector
+;; percepts are maps with keys
+;; :satisfaction-vector - related emotional state
+;; :timestamp - when the percept occured
+;; :other-agents - other agents or people associated with the event
+;; :locations - indications of where the percept took place
+;; :stm-expiration - when does this percept get removed from short-term memory
+;; :learning-vector - emotional impact of percept
 
 ;; control points map motivation threshold scores (called an
 ;; expression vector) to points in valence/arousal space
@@ -191,3 +199,23 @@
           arousal (reduce (partial ord-val :arousal) 0.0 with-dist)
           total-weight (reduce (fn [acc cp] (+ acc (:weight cp))) 0.0 with-dist)]
       {:valence (/ valence total-weight) :arousal (/ arousal total-weight)})))
+
+;;
+;; Functions related to short-term memory
+;;
+
+(defn equivalent-percepts
+  "Return true if two percepts are equivalent"
+  [p1 p2]
+  (and (= (:name p1) (:name p2))
+       (= (:other-agents p1) (:other-agents p2))
+       (= (:locations p1) (:locations p2))))
+
+(defn short-term-memory-add
+  "Add new percepts to short-term memory if they are no equivalent to existin percepts as defined by equiv-fn"
+  [stm new-percepts equiv-fn retain-period]
+  (let [new-percepts-with-expire
+        (map #(assoc % :stm-expiration
+                     (t/plus (:timestamp %) retain-period))
+             new-percepts)]
+    (concat stm new-percepts-with-expire)))

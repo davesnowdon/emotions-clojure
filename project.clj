@@ -4,6 +4,7 @@
   :license {:name "LGPL v2.1"
             :url "http://www.gnu.org/licenses/lgpl-2.1.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
+                 [clj-time "0.7.0"]
                  [expectations "1.4.56"]]
   :profile {:dev {:dependencies [[expectations "1.4.56"]]}}
   :plugins [[lein-autoexpect "1.0"]
