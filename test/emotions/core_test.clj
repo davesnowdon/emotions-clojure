@@ -278,7 +278,7 @@
 ;; the max-delta of the motivation should be reduced by adjustment
 (let [motivations [{:id :hunger, :desire 0.6, :decay-rate 0.1,
                     :max-delta 0.3, :layer :physical}]
-      sv { :hunger 0.5}]
+      sv { :hunger 0.4}]
   (expect (float= 0.29 (:max-delta
                        (first
                         (adjust-max-deltas motivations sv 0.01))))))
