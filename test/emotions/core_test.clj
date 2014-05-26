@@ -10,12 +10,22 @@
 (def percept {:satisfaction-vector {:hunger 0.5, :survival 0.0}})
 
 ;; desire should increase by value of :decay-rate
-(expect {:desire 0.1} (in (decay-motivation {:desire 0.0, :decay-rate 0.1})))
+(expect {:desire 0.1}
+        (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 1.0)))
+
+;; if time since update is 0.5 seconds then desire should change by
+;; half of decay rate
+(expect {:desire 0.05}
+        (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 0.5)))
+
+;; if no time has elapsed there should be no change
+(expect {:desire 0.0}
+        (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 0.0)))
 
 ;; decay all motivations should decay each motivation in a sequence
 (expect [{:id :hunger, :desire 0.1, :decay-rate 0.1,
           :max-delta 0.3, :layer :physical}]
-        (decay-all-motivations [hunger]))
+        (decay-all-motivations [hunger] 1.0))
 
 ;; adding a percept should modify the motivations desire by the value in the
 ;; percept's satisfaction vector the corresponds to the motivation

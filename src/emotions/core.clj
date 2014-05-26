@@ -21,14 +21,15 @@
 (def default-max-change-threshold 0.1)
 
 (defn decay-motivation
-  "Decay a motivation's current desire by the amount of its decay rate"
-  [motivation]
-  (assoc motivation :desire (+ (:desire motivation) (:decay-rate motivation))))
+  "Decay a motivation's current desire by the amount of its decay rate in seconds according to the time elapsed since the last update"
+  [motivation time-since-update]
+  (let [delta (* (:decay-rate motivation) time-since-update)]
+    (assoc motivation :desire (+ (:desire motivation) delta))))
 
 (defn decay-all-motivations
-  "Decay a sequence of motivations"
-  [motivations]
-  (map decay-motivation motivations))
+  "Decay a sequence of motivations according to the time since the last update"
+  [motivations time-since-update]
+  (map #(decay-motivation % time-since-update) motivations))
 
 (defn add-percept
   "Add the from a percept's satisfaction vector with the motivations current desire"
@@ -88,10 +89,10 @@
 
 (defn update-motivations
   "Update the motivations desire values for a time step given a sequence of percepts"
-  [motivations percepts]
+  [motivations percepts time-since-update]
   (-> motivations
       (start-update)
-      (decay-all-motivations)
+      (decay-all-motivations time-since-update)
       (add-percepts percepts)
       (end-update)))
 
@@ -160,8 +161,8 @@
 
 (defn percepts->motivations+sv
   "Given a sequence of percepts update the motivations and generate the corresponding satisfaction vector. Returns a vector containing the new motivations sequence as the first element and the satisfaction vector as the second element"
-  [layers layer-multipliers motivations percepts]
-  (let [pm (update-motivations motivations percepts)
+  [layers layer-multipliers motivations percepts time-since-update]
+  (let [pm (update-motivations motivations percepts time-since-update)
         sv (motivations->sv pm)
         ls (motivations->layer-scores pm)
         m2l (motivations->layers pm)
