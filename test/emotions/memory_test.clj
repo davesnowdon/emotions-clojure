@@ -49,13 +49,38 @@
                :other-agents [:joe]
                :locations [:london]}
       retain-period (t/millis 10000)]
-  (expect 1
-          (count (short-term-memory-add stm
-                                        [percept]
-                                        equivalent-percepts
-                                        retain-period))))
+  (expect 1 (count (short-term-memory-add stm
+                                          [percept]
+                                          equivalent-percepts
+                                          retain-period))))
 
 ;; adding a percept to short-term memory should give it an expiration time
+(let [stm #{}
+      percept {:name "Angry"
+               :timestamp (t/now)
+               :other-agents [:joe]
+               :locations [:london]}
+      retain-period (t/millis 10000)]
+  (expect (:stm-expiration
+           (first (short-term-memory-add stm
+                                         [percept]
+                                         equivalent-percepts
+                                         retain-period)))))
 
 ;; if a similar percept is in short-term memory then the new percept is
 ;; not added and the expiration time of the existing percept is extended
+(let [old-exp (t/now)
+      template {:name "Angry"
+                :other-agents [:joe]
+                :locations [:london]}
+      stm #{(assoc template
+              :timestamp (t/minus (t/now) (t/millis 10000))
+              :stm-expiration old-exp)}
+      percept (assoc template :timestamp (t/now))
+      retain-period (t/millis 10000)
+      new-stm (short-term-memory-add stm
+                                     [percept]
+                                     equivalent-percepts
+                                     retain-period)]
+  (expect 1 (count new-stm))
+  (expect (t/after? (:stm-expiration (first new-stm)) old-exp)))

@@ -211,11 +211,35 @@
        (= (:other-agents p1) (:other-agents p2))
        (= (:locations p1) (:locations p2))))
 
+(defn- add-stm-expiration
+  [percepts retain-period]
+  (map #(assoc % :stm-expiration
+               (t/plus (:timestamp %) retain-period))
+       percepts))
+
+(defn- stm-exists
+  [stm percept equiv-fn]
+  (some #(equiv-fn % percept) stm))
+
+(defn- stm-equivalent-percepts
+  [stm new-percepts equiv-fn]
+  (filter #(stm-exists stm % equiv-fn) new-percepts))
+
+(defn- stm-new-percepts
+  [stm new-percepts equiv-fn]
+  (filter #((complement stm-exists) stm % equiv-fn) new-percepts))
+
+(defn- stm-extend-equiv
+  [stm percepts equiv-fn]
+  (->> (for [s stm p percepts]
+         (if (equiv-fn s p)
+           (assoc s :stm-expiration (:stm-expiration p))))
+       (filter identity)))
+
 (defn short-term-memory-add
-  "Add new percepts to short-term memory if they are no equivalent to existin percepts as defined by equiv-fn"
-  [stm new-percepts equiv-fn retain-period]
-  (let [new-percepts-with-expire
-        (map #(assoc % :stm-expiration
-                     (t/plus (:timestamp %) retain-period))
-             new-percepts)]
-    (concat stm new-percepts-with-expire)))
+  "Add new percepts to short-term memory if they are not equivalent to existin percepts as defined by equiv-fn"
+  [stm percepts equiv-fn retain-period]
+  (let [with-expire (add-stm-expiration percepts retain-period)
+        new-percepts (stm-new-percepts stm with-expire equiv-fn)
+        equiv-percepts (stm-equivalent-percepts stm with-expire equiv-fn)]
+    (concat (stm-extend-equiv stm equiv-percepts equiv-fn) new-percepts)))
