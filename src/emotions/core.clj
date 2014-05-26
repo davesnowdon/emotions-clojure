@@ -243,3 +243,15 @@
         new-percepts (stm-new-percepts stm with-expire equiv-fn)
         equiv-percepts (stm-equivalent-percepts stm with-expire equiv-fn)]
     (concat (stm-extend-equiv stm equiv-percepts equiv-fn) new-percepts)))
+
+(defn short-term-memory-expired
+  "Remove percepts that have reached their expiration time. Returns a map containing the new short-term memory as :stm and the expired percepts with key :expired"
+  [stm timestamp]
+  (loop [remaining stm expired #{} not-expired #{}]
+    (if (not (seq remaining))
+      (assoc {} :stm not-expired :expired expired)
+      (let [p (first remaining)
+            is-expired (t/after? timestamp (:stm-expiration p))
+            new-exp (if is-expired (conj expired p) expired)
+            new-not (if is-expired not-expired (conj not-expired p))]
+        (recur (rest remaining) new-exp new-not)))))

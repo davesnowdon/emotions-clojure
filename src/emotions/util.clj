@@ -28,3 +28,6 @@
        (filter (fn [[k v]] (not (float= 0.0 v))))
        (map (partial apply hash-map))
        (apply merge-with concat)))
+
+;; from https://gist.github.com/gorsuch/1418850
+(defn uuid [] (str (java.util.UUID/randomUUID)))

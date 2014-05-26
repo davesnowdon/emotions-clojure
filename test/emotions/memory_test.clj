@@ -7,11 +7,13 @@
             [expectations :refer :all]))
 
 ;; percepts are equivalent if the name, agents and locations match
-(let [p1 {:name "Angry"
+(let [p1 {:id (uuid)
+          :name "Angry"
           :timestamp (t/now)
           :other-agents [:joe]
           :locations [:london]}
-      p2 {:name "Angry"
+      p2 {:id (uuid)
+          :name "Angry"
           :timestamp (t/now)
           :other-agents [:joe]
           :locations [:london]}]
@@ -21,30 +23,31 @@
 (let [template {:timestamp (java.util.Date.)
                 :other-agents [:joe]
                 :locations [:london]}
-      p1 (assoc template :name "Foo")
-      p2 (assoc template :name "Bar")]
+      p1 (assoc template :id (uuid) :name "Foo")
+      p2 (assoc template :id (uuid) :name "Bar")]
   (expect false (equivalent-percepts p1 p2)))
 
 ;; Percepts can't match if locations are different
 (let [template {:name "Angry"
                 :timestamp (t/now)
                 :other-agents [:joe]}
-      p1 (assoc template :locations [:london])
-      p2 (assoc template :locations [:paris])]
+      p1 (assoc template :id (uuid) :locations [:london])
+      p2 (assoc template :id (uuid) :locations [:paris])]
   (expect false (equivalent-percepts p1 p2)))
 
 ;; Percepts can't match if other agents are different
 (let [template {:name "Angry"
                 :timestamp (t/now)
                 :locations [:london]}
-      p1 (assoc template :other-agents [:joe])
-      p2 (assoc template :other-agents [:fred])]
+      p1 (assoc template :id (uuid) :other-agents [:joe])
+      p2 (assoc template :id (uuid) :other-agents [:fred])]
   (expect false (equivalent-percepts p1 p2)))
 
 ;; adding a percept to short-term memory should increase the number of
 ;; percepts in memory
 (let [stm #{}
-      percept {:name "Angry"
+      percept {:id (uuid)
+               :name "Angry"
                :timestamp (t/now)
                :other-agents [:joe]
                :locations [:london]}
@@ -56,7 +59,8 @@
 
 ;; adding a percept to short-term memory should give it an expiration time
 (let [stm #{}
-      percept {:name "Angry"
+      percept {:id (uuid)
+               :name "Angry"
                :timestamp (t/now)
                :other-agents [:joe]
                :locations [:london]}
@@ -84,3 +88,13 @@
                                      retain-period)]
   (expect 1 (count new-stm))
   (expect (t/after? (:stm-expiration (first new-stm)) old-exp)))
+
+;; should return short-term memory without expired percepts
+(let [stm #{ {:id (uuid)
+              :name "Got angry"
+              :other-agents [:joe]
+              :locations [:london]
+              :timestamp (t/minus (t/now) (t/millis 20000))
+              :stm-expiration (t/minus (t/now) (t/millis 10000))}}]
+  (expect 0 (count (:stm (short-term-memory-expired stm (t/now)))))
+  (expect 1 (count (:expired (short-term-memory-expired stm (t/now))))))
