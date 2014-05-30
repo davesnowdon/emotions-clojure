@@ -31,3 +31,8 @@
 
 ;; from https://gist.github.com/gorsuch/1418850
 (defn uuid [] (str (java.util.UUID/randomUUID)))
+
+(defn add-key
+  "Add key & value to every map in a sequence"
+  [ms key value]
+  (map #(assoc % key value) ms))
