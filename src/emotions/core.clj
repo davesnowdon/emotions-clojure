@@ -8,12 +8,13 @@
 ;; satisfaction vectors are maps with the motivation name as a key
 
 ;; percepts are maps with keys
-;; :satisfaction-vector - related emotional state
+;; :satisfaction-vector - emotional state associated with this percept
 ;; :timestamp - when the percept occured
 ;; :other-agents - other agents or people associated with the event
 ;; :locations - indications of where the percept took place
 ;; :stm-expiration - when does this percept get removed from short-term memory
 ;; :learning-vector - emotional impact of percept
+;; :satisfaction-vector-obs - global satisfaction vector when percept observer
 
 ;; control points map motivation threshold scores (called an
 ;; expression vector) to points in valence/arousal space
