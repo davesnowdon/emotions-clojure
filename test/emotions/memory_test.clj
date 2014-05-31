@@ -98,3 +98,11 @@
               :stm-expiration (t/minus (t/now) (t/millis 10000))}}]
   (expect 0 (count (:stm (short-term-memory-expired stm (t/now)))))
   (expect 1 (count (:expired (short-term-memory-expired stm (t/now))))))
+
+;; each motivation has a learning window (lw) measured in milliseconds over which
+;; updates to the learning vector are distributed. Each update to the learning vector
+;; is weighted as update interval * 1000 /  lw
+;; lw milliseconds after the percept has entered short-term memory no further
+;; updates are made to the learning vector
+
+;(short-term-memory-learn stm interval global-sv motivations)

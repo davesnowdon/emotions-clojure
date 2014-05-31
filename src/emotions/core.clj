@@ -3,7 +3,8 @@
             [clj-time.core :as t]
             [clj-time.coerce :as tc]))
 
-;; motivations are maps
+;; motivations are maps, with keys
+;; learning-window-ms - learning window in milliseconds
 
 ;; satisfaction vectors are maps with the motivation name as a key
 
@@ -256,3 +257,8 @@
             new-exp (if is-expired (conj expired p) expired)
             new-not (if is-expired not-expired (conj not-expired p))]
         (recur (rest remaining) new-exp new-not)))))
+
+(defn short-term-memory-learn
+  "Takes the contents of short-term memory, the interval since the last update, the global satisfaction vector and the set of motivations and updates :learning-vector for each percept"
+  [stm interval global-sv motivations]
+  )
