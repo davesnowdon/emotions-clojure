@@ -46,6 +46,7 @@
 ;; adding a percept to short-term memory should increase the number of
 ;; percepts in memory
 (let [stm #{}
+      global-sv {:hunger 0.5, :survival 0.0}
       percept {:id (uuid)
                :name "Angry"
                :timestamp (t/now)
@@ -54,26 +55,36 @@
       retain-period (t/millis 10000)]
   (expect 1 (count (short-term-memory-add stm
                                           [percept]
+                                          global-sv
                                           equivalent-percepts
                                           retain-period))))
 
 ;; adding a percept to short-term memory should give it an expiration time
+;; and a learning vector
 (let [stm #{}
+      global-sv {:hunger 0.5, :survival 0.0}
       percept {:id (uuid)
                :name "Angry"
                :timestamp (t/now)
                :other-agents [:joe]
                :locations [:london]}
-      retain-period (t/millis 10000)]
-  (expect (:stm-expiration
-           (first (short-term-memory-add stm
-                                         [percept]
-                                         equivalent-percepts
-                                         retain-period)))))
+      retain-period (t/millis 10000)
+      new-stm (short-term-memory-add stm
+                                     [percept]
+                                     global-sv
+                                     equivalent-percepts
+                                     retain-period)]
+  (expect (:stm-entry (first new-stm)))
+  (expect (:stm-expiration (first new-stm)))
+  (expect (set (keys (:learning-vector (first new-stm))))
+          (set (keys global-sv)))
+  (expect (:satisfaction-vector-obs (first new-stm)) global-sv)
+  )
 
 ;; if a similar percept is in short-term memory then the new percept is
 ;; not added and the expiration time of the existing percept is extended
 (let [old-exp (t/now)
+      global-sv {:hunger 0.5, :survival 0.0}
       template {:name "Angry"
                 :other-agents [:joe]
                 :locations [:london]}
@@ -84,6 +95,7 @@
       retain-period (t/millis 10000)
       new-stm (short-term-memory-add stm
                                      [percept]
+                                     global-sv
                                      equivalent-percepts
                                      retain-period)]
   (expect 1 (count new-stm))

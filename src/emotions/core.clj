@@ -213,11 +213,23 @@
        (= (:other-agents p1) (:other-agents p2))
        (= (:locations p1) (:locations p2))))
 
-(defn- add-stm-expiration
-  [percepts retain-period]
-  (map #(assoc % :stm-expiration
-               (t/plus (:timestamp %) retain-period))
-       percepts))
+(defn- make-lv
+  "Create a learning vector given a sequence of keys to use"
+  [svk]
+  (apply merge (map #(assoc {} % 0.0) svk)))
+
+(defn- add-stm-keys
+  ([percepts sv retain-period]
+     (add-stm-keys percepts sv retain-period (t/now)))
+
+  ([percepts sv retain-period timestamp]
+     (let [exp (t/plus timestamp retain-period)
+           lv (make-lv (keys sv))
+           to-merge {:stm-entry timestamp
+                     :stm-expiration exp
+                     :learning-vector lv
+                     :satisfaction-vector-obs sv}]
+       (map #(merge % to-merge) percepts))))
 
 (defn- stm-exists
   [stm percept equiv-fn]
@@ -240,23 +252,29 @@
 
 (defn short-term-memory-add
   "Add new percepts to short-term memory if they are not equivalent to existin percepts as defined by equiv-fn"
-  [stm percepts equiv-fn retain-period]
-  (let [with-expire (add-stm-expiration percepts retain-period)
-        new-percepts (stm-new-percepts stm with-expire equiv-fn)
-        equiv-percepts (stm-equivalent-percepts stm with-expire equiv-fn)]
-    (concat (stm-extend-equiv stm equiv-percepts equiv-fn) new-percepts)))
+  ([stm percepts global-sv equiv-fn retain-period]
+     (short-term-memory-add stm percepts global-sv equiv-fn retain-period (t/now)))
+
+  ([stm percepts global-sv equiv-fn retain-period timestamp]
+     (let [with-expire (add-stm-keys percepts global-sv retain-period timestamp)
+           new-percepts (stm-new-percepts stm with-expire equiv-fn)
+           equiv-percepts (stm-equivalent-percepts stm with-expire equiv-fn)]
+       (concat (stm-extend-equiv stm equiv-percepts equiv-fn) new-percepts))))
 
 (defn short-term-memory-expired
   "Remove percepts that have reached their expiration time. Returns a map containing the new short-term memory as :stm and the expired percepts with key :expired"
-  [stm timestamp]
-  (loop [remaining stm expired #{} not-expired #{}]
-    (if (not (seq remaining))
-      (assoc {} :stm not-expired :expired expired)
-      (let [p (first remaining)
-            is-expired (t/after? timestamp (:stm-expiration p))
-            new-exp (if is-expired (conj expired p) expired)
-            new-not (if is-expired not-expired (conj not-expired p))]
-        (recur (rest remaining) new-exp new-not)))))
+  ([stm]
+     (short-term-memory-expired stm (t/now)))
+
+  ([stm timestamp]
+     (loop [remaining stm expired #{} not-expired #{}]
+       (if (not (seq remaining))
+         (assoc {} :stm not-expired :expired expired)
+         (let [p (first remaining)
+               is-expired (t/after? timestamp (:stm-expiration p))
+               new-exp (if is-expired (conj expired p) expired)
+               new-not (if is-expired not-expired (conj not-expired p))]
+           (recur (rest remaining) new-exp new-not))))))
 
 (defn short-term-memory-learn
   "Takes the contents of short-term memory, the interval since the last update, the global satisfaction vector and the set of motivations and updates :learning-vector for each percept"
