@@ -9,6 +9,36 @@
 
 (def percept {:satisfaction-vector {:hunger 0.5, :survival 0.0}})
 
+(def motivations
+  [{:id :phys-anger :name "anger" :layer :physical
+    :valence -0.7 :arousal 0.7
+    :desire 0.0 :decay-rate -0.02 :max-delta 1.0}
+   {:id :phys-hunger :name "hunger" :layer :physical
+    :valence 0.0 :arousal 0.5
+    :desire 0.1 :decay-rate 0.0 :max-delta 1.0}
+   {:id :phys-fear :name "fear" :layer :physical
+    :valence -0.9 :arousal 0.2
+    :desire 0.2 :decay-rate -0.2 :max-delta 1.0}
+   {:id :saf-bored :name "bored" :layer :safety
+    :valence -0.1 :arousal -0.4
+    :desire 0.3 :decay-rate 0.02 :max-delta 0.3}
+   {:id :saf-delight :name "delight" :layer :safety
+    :valence 0.7 :arousal 0.7
+    :desire 0.4 :decay-rate 0.0 :max-delta 0.8}
+   {:id :saf-playful :name "playful" :layer :safety
+    :valence 0.6 :arousal 0.9
+    :desire 0.5 :decay-rate 0.01 :max-delta 0.3}
+   {:id :soc-lonely :name "lonely" :layer :social
+    :valence -0.6 :arousal -0.6
+    :desire 0.6 :decay-rate 0.01 :max-delta 0.3}
+   ])
+
+; check that we can pull values out of motivations
+(expect (float= 0.6 ((motivations->sv motivations) :soc-lonely)))
+(expect (nil? ((motivations->sv motivations) :foo)))
+
+(expect "anger" ((make-motivation-map motivations :id :name) :phys-anger))
+
 ;; desire should increase by value of :decay-rate
 (expect {:desire 0.1}
         (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 1.0)))

@@ -106,13 +106,18 @@
       (add-percepts percepts)
       (end-update)))
 
+(defn make-motivation-map
+  "Make a map from one key in the sequence of motivations to another"
+  [motivations from-key to-key]
+  (->> motivations
+       (map (juxt from-key to-key))
+       (map (partial apply hash-map))
+       (apply merge-with concat)))
+
 (defn motivations->sv
   "Create a satisfaction vector from a sequence of motivations with each key in the satisfaction vector being the motivation name and the value being the associated desire score"
   [motivations]
-  (->> motivations
-       (map (juxt :id :desire))
-       (map (partial apply hash-map))
-       (apply merge-with concat)))
+  (make-motivation-map motivations :id :desire))
 
 (defn motivations->layer-scores
   "Return the normalised desire scores for each layer"
