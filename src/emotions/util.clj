@@ -1,4 +1,6 @@
-(ns emotions.util)
+(ns emotions.util
+  (:require [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 ;; from http://gettingclojure.wikidot.com/cookbook:numbers
 (defn float=
@@ -36,3 +38,13 @@
   "Add key & value to every map in a sequence"
   [ms key value]
   (map #(assoc % key value) ms))
+
+(defn millis-diff
+  "Return the difference between two DateTimes in milliseconds (long)"
+  [dt1 dt2]
+  (- (tc/to-long dt1) (tc/to-long dt2)))
+
+(defn seconds-diff
+  "Return the difference between two DateTimes as seconds (float)"
+  [dt1 dt2]
+  (/ (millis-diff dt1 dt2) (float 1000)))

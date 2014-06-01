@@ -232,6 +232,7 @@
            lv (make-lv (keys sv))
            to-merge {:stm-entry timestamp
                      :stm-expiration exp
+                     :stm-last-update timestamp
                      :learning-vector lv
                      :satisfaction-vector-obs sv}]
        (map #(merge % to-merge) percepts))))
@@ -281,7 +282,35 @@
                new-not (if is-expired not-expired (conj not-expired p))]
            (recur (rest remaining) new-exp new-not))))))
 
+(defn- lv-element-delta
+  "Return the change for a given element of the learning vector"
+  [sve-delta interval-ms lw-ms stm-time-ms]
+  (if (> stm-time-ms lw-ms)
+    0
+    (* sve-delta (/ (float interval-ms) lw-ms))))
+
+(defn- adjust-learning-vector
+  [percept global-sv lws timestamp]
+  (let [stm-time (millis-diff timestamp (:stm-entry percept))
+        upd-interval (millis-diff timestamp (:stm-last-update percept))
+        sv-obs (:satisfaction-vector-obs percept)
+        sv-delta (merge-with - global-sv sv-obs)
+        lv-delta (apply merge
+                        (map (fn [k]
+                               (hash-map k (lv-element-delta
+                                            (sv-delta k)
+                                            upd-interval
+                                            (lws k)
+                                            stm-time)))
+                             (keys sv-delta)))
+        new-lv (merge-with + (:learning-vector percept) lv-delta)]
+    (assoc percept :learning-vector new-lv)))
+
 (defn short-term-memory-learn
   "Takes the contents of short-term memory, the interval since the last update, the global satisfaction vector and the set of motivations and updates :learning-vector for each percept"
-  [stm interval global-sv motivations]
-  )
+  ([stm global-sv motivations]
+     (short-term-memory-learn stm global-sv motivations (t/now)))
+
+  ([stm global-sv motivations timestamp]
+     (let [lws (make-motivation-map motivations :id :learning-window)]
+       (map #(adjust-learning-vector % global-sv lws timestamp) stm))))

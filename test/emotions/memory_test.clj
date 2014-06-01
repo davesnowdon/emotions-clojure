@@ -106,15 +106,49 @@
               :name "Got angry"
               :other-agents [:joe]
               :locations [:london]
-              :timestamp (t/minus (t/now) (t/millis 20000))
+              :stm-entry (t/minus (t/now) (t/millis 20000))
               :stm-expiration (t/minus (t/now) (t/millis 10000))}}]
   (expect 0 (count (:stm (short-term-memory-expired stm (t/now)))))
   (expect 1 (count (:expired (short-term-memory-expired stm (t/now))))))
 
-;; each motivation has a learning window (lw) measured in milliseconds over which
-;; updates to the learning vector are distributed. Each update to the learning vector
-;; is weighted as update interval * 1000 /  lw
-;; lw milliseconds after the percept has entered short-term memory no further
-;; updates are made to the learning vector
-
-;(short-term-memory-learn stm interval global-sv motivations)
+;; each motivation has a learning window (lw) measured in milliseconds
+;; over which updates to the learning vector are distributed. Each
+;; update to the learning vector is weighted as
+;; update interval * 1000 /  lw
+;; lw milliseconds after the percept has entered short-term memory no
+;; further updates are made to the learning vector
+(let [motivations [{:id :phys-hunger :name "hunger" :layer :physical
+                    :valence 0.0 :arousal 0.5
+                    :desire 0.1 :decay-rate 0.0 :max-delta 1.0
+                    :learning-window (* 2 60 60 1000)}
+                   {:id :saf-delight :name "delight" :layer :safety
+                    :valence 0.7 :arousal 0.7
+                    :desire 0.4 :decay-rate 0.0 :max-delta 0.8
+                    :learning-window 60000}]
+      start-global-sv {:phys-hunger 0.1 :saf-delight 0.5}
+      hungier-global-sv {:phys-hunger 0.9 :saf-delight 0.5}
+      delighted-global-sv {:phys-hunger 0.1 :saf-delight 0.0}
+      stm-entry (t/minus (t/now) (t/millis 10000))
+      now (t/now)
+      percepts [{:id (uuid)
+                 :name "Angry"
+                 :timestamp (t/now)
+                 :other-agents [:joe]
+                 :locations [:london]}]
+      retain-period (t/millis 60000)
+      stm (short-term-memory-add
+           #{} percepts start-global-sv equivalent-percepts
+           retain-period stm-entry)
+      stm-no-change (short-term-memory-learn
+                     stm start-global-sv motivations now)
+      percept-no-change (first stm-no-change)
+      stm-hungrier (short-term-memory-learn
+                    stm hungier-global-sv motivations now)
+      percept-hungrier (first stm-hungrier)
+      stm-happier (short-term-memory-learn
+                   stm delighted-global-sv motivations now)
+      percept-happier (first stm-happier)]
+  (expect (every? zero? (vals (:learning-vector percept-no-change))))
+  (expect (not (every? zero? (vals (:learning-vector percept-hungrier)))))
+  (expect (not (every? zero? (vals (:learning-vector percept-happier)))))
+  )
