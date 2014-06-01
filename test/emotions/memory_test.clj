@@ -152,3 +152,33 @@
   (expect (not (every? zero? (vals (:learning-vector percept-hungrier)))))
   (expect (not (every? zero? (vals (:learning-vector percept-happier)))))
   )
+
+;; should be able to check whether a percept is worth persisting to LTM
+;; a percept where the mean of the abs of the learning vector is
+;; greater than ltm-default-learning-vector-threshold should be
+;; significant
+(expect (percept-significant?
+         {:learning-vector {:a 0.2 :b 0.0 :c 0.2 :d 0.0 :e 0.15}}))
+
+;; a percept with a learning vector with a single value greater than
+;; ltm-default-learning-vector-element-threshold should be significant
+(expect (percept-significant?
+         {:learning-vector {:a 0.0 :b 0.0 :c 0.0 :d 0.0 :e 0.31}}))
+
+;; should be able to save a new percept to LTM
+
+;; should be able to update an existing percept in LTM
+
+;; should be able to look up a percept in long-term memory and get
+;; a satisfaction vector
+
+;; a percept that matches exactly should have a weight of 1.0
+
+;; if there is no exact match, returned value and weight based on
+;; closest match based on name, location & other agents
+
+;; should be able to initialise long-term memory using data structure
+
+;; should be able to save long-term memory to EDN file
+
+;; should be able to read long-term memory from EDN file

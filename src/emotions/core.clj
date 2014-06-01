@@ -30,6 +30,18 @@
 ;; its max-change reduced
 (def default-max-change-threshold 0.1)
 
+;; long-term memory lookup weights
+(def ltm-name-weight 1/3)
+(def ltm-agents-weight 1/3)
+(def ltm-location-weight 1/3)
+
+;; the min average value of a learning vector for a percept in order
+;; to make it worth remembering
+(def ltm-default-learning-vector-threshold 0.1)
+;; magnitude of a single learning vector element that makes it worth
+;; storing in long-term memory
+(def ltm-default-learning-vector-element-threshold 0.3)
+
 (defn decay-motivation
   "Decay a motivation's current desire by the amount of its decay rate in seconds according to the time elapsed since the last update"
   [motivation time-since-update]
@@ -314,3 +326,33 @@
   ([stm global-sv motivations timestamp]
      (let [lws (make-motivation-map motivations :id :learning-window)]
        (map #(adjust-learning-vector % global-sv lws timestamp) stm))))
+
+;;
+;; Functions related to long-term memory
+;;
+(defn percept->lv
+  [percept]
+  (:learning-vector percept))
+
+(defn- percept->lv-values
+  [percept]
+  (vals (percept->lv percept)))
+
+(defn percept-lv-mean
+  [percept]
+  (mean (abs-all (percept->lv-values percept))))
+
+(defn percept-lv-max
+  [percept]
+  (apply max (abs-all (percept->lv-values percept))))
+
+(defn percept-significant?
+  "Return true if a percept is emotionally significant (worth storing in long-term memory)"
+  ([percept]
+     (percept-significant? percept
+                           ltm-default-learning-vector-threshold
+                           ltm-default-learning-vector-element-threshold))
+
+  ([percept mean-threshold element-threshold]
+     (or (> (percept-lv-mean percept) mean-threshold)
+         (> (percept-lv-max percept) element-threshold))))

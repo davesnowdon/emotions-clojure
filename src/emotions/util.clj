@@ -48,3 +48,13 @@
   "Return the difference between two DateTimes as seconds (float)"
   [dt1 dt2]
   (/ (millis-diff dt1 dt2) (float 1000)))
+
+(defn abs-all
+  "Apply the abs function to each element in a collection"
+  [num-coll]
+  (map #(Math/abs %) num-coll))
+
+(defn mean
+  "Return the mean (average) of a collection of numbers"
+  [num-coll]
+  (/ (apply + num-coll) (count num-coll)))
