@@ -166,6 +166,14 @@
          {:learning-vector {:a 0.0 :b 0.0 :c 0.0 :d 0.0 :e 0.31}}))
 
 ;; should be able to save a new percept to LTM
+(let [ltm (long-term-memory-init)
+      percept-id (uuid)
+      percept {:id percept-id
+               :name "Angry"
+               :timestamp (t/now)
+               :other-agents [:joe]
+               :locations [:london]}]
+  (expect 1 (count (:percepts (long-term-memory-add-percept ltm percept)))))
 
 ;; should be able to update an existing percept in LTM
 

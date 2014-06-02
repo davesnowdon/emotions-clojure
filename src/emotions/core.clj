@@ -356,3 +356,40 @@
   ([percept mean-threshold element-threshold]
      (or (> (percept-lv-mean percept) mean-threshold)
          (> (percept-lv-max percept) element-threshold))))
+
+(defn- percept->ltm-key
+  [percept]
+  [(:name percept) (:other-agents percept) (:locations percept)])
+
+(defn long-term-memory-init
+  []
+  {:percepts {} :agents {} :locations {}})
+
+(defn long-term-memory-add-percept
+  ""
+  [ltm percept]
+  (assoc-in ltm [:percepts (:id percept)] percept))
+
+(defn long-term-memory-get-sv
+  ""
+  [ltm percept])
+
+(defn long-term-memory-add-location
+  ""
+  [ltm location]
+  (assoc-in ltm [:locations (:id location)] location))
+
+(defn long-term-memory-find-location
+  ""
+  [ltm id]
+  (get-in ltm [:locations id]))
+
+(defn long-term-memory-add-agent
+  ""
+  [ltm agent]
+  (assoc-in ltm [:agents (:id agent)] agent))
+
+(defn long-term-memory-find-agent
+  ""
+  [ltm id]
+  (get-in ltm [:agents id]))
