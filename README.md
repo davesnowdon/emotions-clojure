@@ -18,3 +18,5 @@ Percept - A piece of sense data (internal or external) that is "perceived" by on
 Long term memory (LTM) - long lived association of percepts and their associated satisfaction vectors
 
 Short term memory (STM) - recently perceived percepts and their associated satisfaction vectors
+
+For example of model in use see:https://github.com/davesnowdon/emotions-clojure-demo
