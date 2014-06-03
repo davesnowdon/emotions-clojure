@@ -368,7 +368,7 @@
 (defn long-term-memory-add-percept
   ""
   [ltm percept]
-  (assoc-in ltm [:percepts (:id percept)] percept))
+  (assoc-in ltm [:percepts (percept->ltm-key percept)] percept))
 
 (defn long-term-memory-get-sv
   ""
