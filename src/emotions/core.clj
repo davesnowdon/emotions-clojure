@@ -371,16 +371,37 @@
   (assoc-in ltm [:percepts (percept->ltm-key percept)] percept))
 
 (defn- ltm-name-score
-  [])
+  [desired-name percept]
+  (if (= desired-name (:name percept))
+    ltm-name-weight 0.0))
+
+(defn- weighted-proportion-in-set
+  "Return the proportion of items in the desired set that occur in the actual set multiplied by the supplied weight"
+  [desired actual weight]
+  (* (/ (count (filter desired actual))
+        (count desired))
+     weight))
 
 (defn- ltm-location-score
-  [])
+  [desired-locations percept]
+  (weighted-proportion-in-set desired-locations
+                              (:locations percept)
+                              ltm-location-weight))
 
 (defn- ltm-agents-score
-  [])
+  [desired-agents percept]
+  (weighted-proportion-in-set desired-agents
+                              (:agents percept)
+                              ltm-agents-weight))
 
-(defn long-term-memory-get-sv
-  ""
+(defn- ltm-percept-score
+  [name locations agents percept]
+  (+ (ltm-name-score name percept)
+     (ltm-location-score locations percept)
+     (ltm-agents-score agents percept)))
+
+(defn- ltm-highest-scoring-percept
+  "Return the percept in long-term memory that best matches the supplied percept"
   [ltm percept]
   (let [key (percept->ltm-key percept)
         name (:name percept)
@@ -388,9 +409,19 @@
         agents (:other-agents percept)
         exact-match (get-in ltm [:percepts key])]
     (if exact-match
-      {:satisfaction-vector (:satisfaction-vector exact-match)
-       :weight 1.0}
-      nil)))
+      [1.0 exact-match]
+      (->> (:percepts ltm)
+           (map #([(ltm-percept-score name locations agents %) %]))
+           (sort-by #(% 0) #(compare %2 %1))
+           first))))
+
+(defn long-term-memory-get-sv
+  "Return satisfaction vector and weight that best matches supplied percept"
+  [ltm percept]
+  (let [hsp (ltm-highest-scoring-percept ltm percept)]
+    (if hsp
+      {:satisfaction-vector (:satisfaction-vector (hsp 1))
+       :weight (hsp 0)})))
 
 (defn long-term-memory-add-location
   ""

@@ -193,8 +193,6 @@
   (expect {:satisfaction-vector sv :weight 1.0}
           (long-term-memory-get-sv ltm percept)))
 
-
-
 ;; if there is no exact match, returned value and weight based on
 ;; closest match based on name, location & other agents
 
