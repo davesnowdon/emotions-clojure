@@ -359,7 +359,7 @@
 
 (defn- percept->ltm-key
   [percept]
-  [(:name percept) (:other-agents percept) (:locations percept)])
+  [(:name percept) (set (:other-agents percept)) (set (:locations percept))])
 
 (defn long-term-memory-init
   []
@@ -370,9 +370,27 @@
   [ltm percept]
   (assoc-in ltm [:percepts (percept->ltm-key percept)] percept))
 
+(defn- ltm-name-score
+  [])
+
+(defn- ltm-location-score
+  [])
+
+(defn- ltm-agents-score
+  [])
+
 (defn long-term-memory-get-sv
   ""
-  [ltm percept])
+  [ltm percept]
+  (let [key (percept->ltm-key percept)
+        name (:name percept)
+        locations (:locations percept)
+        agents (:other-agents percept)
+        exact-match (get-in ltm [:percepts key])]
+    (if exact-match
+      {:satisfaction-vector (:satisfaction-vector exact-match)
+       :weight 1.0}
+      nil)))
 
 (defn long-term-memory-add-location
   ""

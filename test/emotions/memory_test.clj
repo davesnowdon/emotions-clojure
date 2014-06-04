@@ -179,8 +179,21 @@
 
 ;; should be able to look up a percept in long-term memory and get
 ;; a satisfaction vector
-
+;;
 ;; a percept that matches exactly should have a weight of 1.0
+(let [sv {:hunger 0.5, :survival 0.0}
+      percept {:id (uuid)
+               :name "Angry"
+               :timestamp (t/now)
+               :other-agents [:joe]
+               :locations [:london]
+               :satisfaction-vector sv}
+      ltm (long-term-memory-add-percept
+           (long-term-memory-init) percept)]
+  (expect {:satisfaction-vector sv :weight 1.0}
+          (long-term-memory-get-sv ltm percept)))
+
+
 
 ;; if there is no exact match, returned value and weight based on
 ;; closest match based on name, location & other agents
