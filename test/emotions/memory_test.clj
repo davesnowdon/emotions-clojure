@@ -175,7 +175,20 @@
                :locations #{:london}}]
   (expect 1 (count (:percepts (long-term-memory-add-percept ltm percept)))))
 
+;; time added to LTM should be stored
+
+;; new enrties (percepts, locations & agents) should have a modification
+;; count of 1
+
+;; new locations should be stored in LTM (with satisfaction vector)
+
+;; new agents should be stored in LTM (with satisfaction vector)
+
 ;; should be able to update an existing percept in LTM
+
+;; satisfaction vectors for locations should be updated
+
+;; satisfaction vectors for agents should be updated
 
 ;; should be able to look up a percept in long-term memory and get
 ;; a satisfaction vector
