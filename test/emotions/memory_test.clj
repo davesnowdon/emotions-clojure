@@ -10,19 +10,19 @@
 (let [p1 {:id (uuid)
           :name "Angry"
           :timestamp (t/now)
-          :other-agents [:joe]
-          :locations [:london]}
+          :other-agents #{:joe}
+          :locations #{:london}}
       p2 {:id (uuid)
           :name "Angry"
           :timestamp (t/now)
-          :other-agents [:joe]
-          :locations [:london]}]
+          :other-agents #{:joe}
+          :locations #{:london}}]
   (expect true (equivalent-percepts p1 p2)))
 
 ;; Different percepts can't match even if other details are the same
 (let [template {:timestamp (java.util.Date.)
-                :other-agents [:joe]
-                :locations [:london]}
+                :other-agents #{:joe}
+                :locations #{:london}}
       p1 (assoc template :id (uuid) :name "Foo")
       p2 (assoc template :id (uuid) :name "Bar")]
   (expect false (equivalent-percepts p1 p2)))
@@ -30,17 +30,17 @@
 ;; Percepts can't match if locations are different
 (let [template {:name "Angry"
                 :timestamp (t/now)
-                :other-agents [:joe]}
-      p1 (assoc template :id (uuid) :locations [:london])
-      p2 (assoc template :id (uuid) :locations [:paris])]
+                :other-agents #{:joe}}
+      p1 (assoc template :id (uuid) :locations #{:london})
+      p2 (assoc template :id (uuid) :locations #{:paris})]
   (expect false (equivalent-percepts p1 p2)))
 
 ;; Percepts can't match if other agents are different
 (let [template {:name "Angry"
                 :timestamp (t/now)
-                :locations [:london]}
-      p1 (assoc template :id (uuid) :other-agents [:joe])
-      p2 (assoc template :id (uuid) :other-agents [:fred])]
+                :locations #{:london}}
+      p1 (assoc template :id (uuid) :other-agents #{:joe})
+      p2 (assoc template :id (uuid) :other-agents #{:fred})]
   (expect false (equivalent-percepts p1 p2)))
 
 ;; adding a percept to short-term memory should increase the number of
@@ -50,8 +50,8 @@
       percept {:id (uuid)
                :name "Angry"
                :timestamp (t/now)
-               :other-agents [:joe]
-               :locations [:london]}
+               :other-agents #{:joe}
+               :locations #{:london}}
       retain-period (t/millis 10000)]
   (expect 1 (count (short-term-memory-add stm
                                           [percept]
@@ -66,8 +66,8 @@
       percept {:id (uuid)
                :name "Angry"
                :timestamp (t/now)
-               :other-agents [:joe]
-               :locations [:london]}
+               :other-agents #{:joe}
+               :locations #{:london}}
       retain-period (t/millis 10000)
       new-stm (short-term-memory-add stm
                                      [percept]
@@ -86,8 +86,8 @@
 (let [old-exp (t/now)
       global-sv {:hunger 0.5, :survival 0.0}
       template {:name "Angry"
-                :other-agents [:joe]
-                :locations [:london]}
+                :other-agents #{:joe}
+                :locations #{:london}}
       stm #{(assoc template
               :timestamp (t/minus (t/now) (t/millis 10000))
               :stm-expiration old-exp)}
@@ -104,8 +104,8 @@
 ;; should return short-term memory without expired percepts
 (let [stm #{ {:id (uuid)
               :name "Got angry"
-              :other-agents [:joe]
-              :locations [:london]
+              :other-agents #{:joe}
+              :locations #{:london}
               :stm-entry (t/minus (t/now) (t/millis 20000))
               :stm-expiration (t/minus (t/now) (t/millis 10000))}}]
   (expect 0 (count (:stm (short-term-memory-expired stm (t/now)))))
@@ -133,8 +133,8 @@
       percepts [{:id (uuid)
                  :name "Angry"
                  :timestamp (t/now)
-                 :other-agents [:joe]
-                 :locations [:london]}]
+                 :other-agents #{:joe}
+                 :locations #{:london}}]
       retain-period (t/millis 60000)
       stm (short-term-memory-add
            #{} percepts start-global-sv equivalent-percepts
@@ -171,8 +171,8 @@
       percept {:id percept-id
                :name "Angry"
                :timestamp (t/now)
-               :other-agents [:joe]
-               :locations [:london]}]
+               :other-agents #{:joe}
+               :locations #{:london}}]
   (expect 1 (count (:percepts (long-term-memory-add-percept ltm percept)))))
 
 ;; should be able to update an existing percept in LTM
@@ -185,8 +185,8 @@
       percept {:id (uuid)
                :name "Angry"
                :timestamp (t/now)
-               :other-agents [:joe]
-               :locations [:london]
+               :other-agents #{:joe}
+               :locations #{:london}
                :satisfaction-vector sv}
       ltm (long-term-memory-add-percept
            (long-term-memory-init) percept)]
@@ -195,6 +195,45 @@
 
 ;; if there is no exact match, returned value and weight based on
 ;; closest match based on name, location & other agents
+(let [percepts [{:id (uuid)
+                 :name "Happy"
+                 :timestamp (t/now)
+                 :other-agents #{:joe}
+                 :locations #{:london}
+                 :satisfaction-vector {:hunger 0.0, :survival 0.0 :joy 0.0}}
+                {:id (uuid)
+                 :name "Angry"
+                 :timestamp (t/now)
+                 :other-agents #{:joe :dave}
+                 :locations #{:london :home}
+                 :satisfaction-vector {:hunger 0.0 :survival 0.5 :joy 0.8}}
+                {:id (uuid)
+                 :name "Sad"
+                 :timestamp (t/now)
+                 :other-agents #{:carl}
+                 :locations #{:paris}
+                 :satisfaction-vector {:hunger 0.0 :survival 0.0 :joy 0.8}}]
+      ; put a sequence of percepts into LTM
+      ltm (reduce long-term-memory-add-percept (long-term-memory-init) percepts)]
+  ; exact match should give us max weight
+  (expect {:weight 1.0 :satisfaction-vector {:hunger 0.0, :survival 0.0 :joy 0.0}}
+          (long-term-memory-get-sv ltm {:name "Happy"
+                                        :other-agents #{:joe}
+                                        :locations #{:london}}))
+
+  ; name only match should give us weight of name only
+  (expect {:weight 1/3 :satisfaction-vector {:hunger 0.0, :survival 0.0 :joy 0.0}}
+          (long-term-memory-get-sv ltm {:name "Happy"
+                                        :other-agents #{:fred}
+                                        :locations #{:tokyo}}))
+
+  ;  other-agents and name should give us more weight
+  (expect {:weight 2/3 :satisfaction-vector {:hunger 0.0, :survival 0.0 :joy 0.0}}
+          (long-term-memory-get-sv ltm {:name "Happy"
+                                        :other-agents #{:joe}
+                                        :locations #{:tokyo}}))
+
+  )
 
 ;; should be able to initialise long-term memory using data structure
 

@@ -391,7 +391,7 @@
 (defn- ltm-agents-score
   [desired-agents percept]
   (weighted-proportion-in-set desired-agents
-                              (:agents percept)
+                              (:other-agents percept)
                               ltm-agents-weight))
 
 (defn- ltm-percept-score
@@ -405,13 +405,13 @@
   [ltm percept]
   (let [key (percept->ltm-key percept)
         name (:name percept)
-        locations (:locations percept)
-        agents (:other-agents percept)
+        locations (set  (:locations percept))
+        agents (set (:other-agents percept))
         exact-match (get-in ltm [:percepts key])]
     (if exact-match
       [1.0 exact-match]
-      (->> (:percepts ltm)
-           (map #([(ltm-percept-score name locations agents %) %]))
+      (->> (vals (:percepts ltm))
+           (map (fn [p] [(ltm-percept-score name locations agents p) p]))
            (sort-by #(% 0) #(compare %2 %1))
            first))))
 
