@@ -227,11 +227,25 @@
                                         :other-agents #{:fred}
                                         :locations #{:tokyo}}))
 
-  ;  other-agents and name should give us more weight
+  ; other-agents and name should give us more weight
   (expect {:weight 2/3 :satisfaction-vector {:hunger 0.0, :survival 0.0 :joy 0.0}}
           (long-term-memory-get-sv ltm {:name "Happy"
                                         :other-agents #{:joe}
                                         :locations #{:tokyo}}))
+
+  ; location and name should give us more weight
+  (expect {:weight 2/3 :satisfaction-vector {:hunger 0.0, :survival 0.5 :joy 0.8}}
+          (long-term-memory-get-sv ltm {:name "Angry"
+                                        :other-agents #{:carl}
+                                        :locations #{:london}}))
+
+  ; one out of 2 locations should be half the weight of getting all locations
+  (expect
+   (float= (float 1/6)
+           (:weight
+            (long-term-memory-get-sv ltm {:name "Miserable"
+                                          :other-agents #{:fred}
+                                          :locations #{:london :paris}}))))
 
   )
 

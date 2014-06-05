@@ -424,21 +424,21 @@
        :weight (hsp 0)})))
 
 (defn long-term-memory-add-location
-  ""
+  "Store a location by id in long-term memory"
   [ltm location]
   (assoc-in ltm [:locations (:id location)] location))
 
 (defn long-term-memory-find-location
-  ""
+  "Retrieve a location by id"
   [ltm id]
   (get-in ltm [:locations id]))
 
 (defn long-term-memory-add-agent
-  ""
+  "Add an agent to long-term memory by id"
   [ltm agent]
   (assoc-in ltm [:agents (:id agent)] agent))
 
 (defn long-term-memory-find-agent
-  ""
+  "Retrieve an agent from long-term memory using its id"
   [ltm id]
   (get-in ltm [:agents id]))
