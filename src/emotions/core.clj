@@ -452,9 +452,20 @@
     (binding [*read-eval* false]
       (deserialise (edn/read r)))))
 
+(defn long-term-memory-read-string
+  "Read from a string into a long-term memory structure"
+  [s]
+  (deserialise (edn/read-string s)))
+
+
 (defn long-term-memory-write
   "Write the contents of long-term memory to file"
   [ltm filename]
   (with-open [w (clojure.java.io/writer filename)]
     (binding [*out* w]
       (pr (serialise ltm)))))
+
+(defn long-term-memory-write-string
+  "Write the contents of long-term memory as a string"
+  [ltm]
+  (pr-str (serialise ltm)))
