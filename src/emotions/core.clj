@@ -1,7 +1,9 @@
 (ns emotions.core
   (:require [emotions.util :refer :all]
+            [emotions.serialise :refer :all]
             [clj-time.core :as t]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [clojure.edn :as edn]))
 
 ;; motivations are maps, with keys
 ;; learning-window-ms - learning window in milliseconds
@@ -442,3 +444,17 @@
   "Retrieve an agent from long-term memory using its id"
   [ltm id]
   (get-in ltm [:agents id]))
+
+(defn long-term-memory-read
+  "Read from a file into a long-term memory structure"
+  [filename]
+  (with-open [r (java.io.PushbackReader. (clojure.java.io/reader filename))]
+    (binding [*read-eval* false]
+      (deserialise (edn/read r)))))
+
+(defn long-term-memory-write
+  "Write the contents of long-term memory to file"
+  [ltm filename]
+  (with-open [w (clojure.java.io/writer filename)]
+    (binding [*out* w]
+      (pr (serialise ltm)))))
