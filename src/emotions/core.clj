@@ -12,12 +12,20 @@
 
 ;; percepts are maps with keys
 ;; :satisfaction-vector - emotional state associated with this percept
-;; :timestamp - when the percept occured
-;; :other-agents - other agents or people associated with the event
-;; :locations - indications of where the percept took place
-;; :stm-expiration - when does this percept get removed from short-term memory
 ;; :learning-vector - emotional impact of percept
-;; :satisfaction-vector-obs - global satisfaction vector when percept observer
+;; :satisfaction-vector-obs - global satisfaction vector when percept
+;;     observed
+;; :timestamp - when the percept occured
+;; :other-agents - other agents or people associated with the event (set)
+;; :locations - indications of where the percept took place (set)
+;; :stm-entry - time added to short-term memory
+;; :stm-expiration - when does this percept get removed from short-term
+;;     memory
+;; :ltm-entry - time added to long-term memory
+;; :ltm-update-count - number of times record has been updated
+;; :data - percpt, location or agent specific data is in a map under
+;;     this key
+
 
 ;; control points map motivation threshold scores (called an
 ;; expression vector) to points in valence/arousal space
@@ -367,10 +375,68 @@
   []
   {:percepts {} :agents {} :locations {}})
 
+(defn ltm-augment
+  "Add the features required on an item when adding it to LTM"
+  [item timestamp sv]
+  (assoc item :ltm-entry timestamp
+              :ltm-update-count 1
+              :satisfaction-vector sv))
+
+;; TODO detect existing agents
+(defn long-term-memory-add-agent
+  "Add an agent to long-term memory by id"
+  ([ltm location sv]
+     (long-term-memory-add-agent ltm agent sv (t/now)))
+  ([ltm agent sv timestamp]
+     (assoc-in ltm [:agents (:id agent)]
+               (ltm-augment agent timestamp sv))))
+
+(defn long-term-memory-find-agent
+  "Retrieve an agent from long-term memory using its id"
+  [ltm id]
+  (get-in ltm [:agents id]))
+
+;; TODO detect existing locations
+(defn long-term-memory-add-location
+  "Store a location by id in long-term memory"
+  ([ltm location sv]
+     (long-term-memory-add-location ltm location sv (t/now)))
+  ([ltm location sv timestamp]
+     (assoc-in ltm [:locations (:id location)]
+               (ltm-augment location timestamp sv))))
+
+(defn long-term-memory-find-location
+  "Retrieve a location by id"
+  [ltm id]
+  (get-in ltm [:locations id]))
+
+(defn- ltm-add-items
+  "Takes ltm a list of items and uses the supplied function to add them to LTM returning the new LTM and a list of ids"
+  [ltm items add-fn]
+  (let [onlyids (filter (complement map?) items)
+        njids (filter map? items)
+        newltm (reduce add-fn ltm njids)
+        allids (concat onlyids (map :id njids))]
+    {:ltm newltm :ids allids}))
+
 (defn long-term-memory-add-percept
-  ""
-  [ltm percept]
-  (assoc-in ltm [:percepts (percept->ltm-key percept)] percept))
+  "Add a percept to long-term memory, adding new locations and agents as necessary"
+  ([ltm percept]
+     (long-term-memory-add-percept ltm percept (t/now)))
+
+  ([ltm percept timestamp]
+     (let [sv (:satisfaction-vector percept)
+           {altm :ltm aids :ids}
+           (ltm-add-items ltm (:other-agents percept)
+                          #(long-term-memory-add-agent %1 %2 sv timestamp))
+           {lltm :ltm lids :ids}
+           (ltm-add-items altm (:locations percept)
+                          #(long-term-memory-add-location %1 %2 sv timestamp))
+           npercept (assoc percept :locations (set lids)
+                                   :other-agents (set aids))]
+       (assoc-in lltm [:percepts (percept->ltm-key npercept)]
+                 (assoc npercept :ltm-entry timestamp
+                                :ltm-update-count 1)))))
 
 (defn- ltm-name-score
   [desired-name percept]
@@ -424,26 +490,6 @@
     (if hsp
       {:satisfaction-vector (:satisfaction-vector (hsp 1))
        :weight (hsp 0)})))
-
-(defn long-term-memory-add-location
-  "Store a location by id in long-term memory"
-  [ltm location]
-  (assoc-in ltm [:locations (:id location)] location))
-
-(defn long-term-memory-find-location
-  "Retrieve a location by id"
-  [ltm id]
-  (get-in ltm [:locations id]))
-
-(defn long-term-memory-add-agent
-  "Add an agent to long-term memory by id"
-  [ltm agent]
-  (assoc-in ltm [:agents (:id agent)] agent))
-
-(defn long-term-memory-find-agent
-  "Retrieve an agent from long-term memory using its id"
-  [ltm id]
-  (get-in ltm [:agents id]))
 
 (defn long-term-memory-read
   "Read from a file into a long-term memory structure"

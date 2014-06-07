@@ -165,24 +165,34 @@
 (expect (percept-significant?
          {:learning-vector {:a 0.0 :b 0.0 :c 0.0 :d 0.0 :e 0.31}}))
 
-;; should be able to save a new percept to LTM
+;; test simple add of new percept (to empty LTM)
 (let [ltm (long-term-memory-init)
       percept-id (uuid)
       percept {:id percept-id
                :name "Angry"
                :timestamp (t/now)
-               :other-agents #{:joe}
-               :locations #{:london}}]
-  (expect 1 (count (:percepts (long-term-memory-add-percept ltm percept)))))
+               :other-agents #{{:id :joe :name "Joe"}}
+               :locations #{{:id :london :name "London"}}
+               :satisfaction-vector {:hunger 0.0, :survival 0.0 :joy 0.0}}
+      ltm (-> (long-term-memory-init)
+              (long-term-memory-add-percept  percept))]
+  ;; should be able to save a new percept to LTM
+  (expect 1 (count (:percepts ltm)))
 
-;; time added to LTM should be stored
+  ;; time added to LTM should be stored
+  (expect (:ltm-entry (first (vals (:percepts ltm)))))
+  ;; new enrties (percepts, locations & agents) should have a modification
+  ;; count of 1
+  (expect 1 (:ltm-update-count (first (vals (:percepts ltm)))))
 
-;; new enrties (percepts, locations & agents) should have a modification
-;; count of 1
+  ;; new locations should be stored in LTM (with satisfaction vector)
+  (expect 1 (count (:locations ltm)))
+  (expect (:satisfaction-vector (first (vals (:locations ltm)))))
 
-;; new locations should be stored in LTM (with satisfaction vector)
-
-;; new agents should be stored in LTM (with satisfaction vector)
+  ;; new agents should be stored in LTM (with satisfaction vector)
+  (expect 1 (count (:agents ltm)))
+  (expect (:satisfaction-vector (first (vals (:agents ltm)))))
+  )
 
 ;; should be able to update an existing percept in LTM
 
@@ -261,9 +271,3 @@
                                           :locations #{:london :paris}}))))
 
   )
-
-;; should be able to initialise long-term memory using data structure
-
-;; should be able to save long-term memory to EDN file
-
-;; should be able to read long-term memory from EDN file
