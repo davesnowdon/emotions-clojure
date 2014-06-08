@@ -388,7 +388,7 @@
               :ltm-update-count 1
               :satisfaction-vector sv))
 
-;; TODO detect existing agents
+;; TODO detect existing agents by content as well as ID
 (defn long-term-memory-add-agent
   "Add an agent to long-term memory by id"
   ([ltm location sv]
@@ -402,7 +402,7 @@
   [ltm id]
   (get-in ltm [:agents id]))
 
-;; TODO detect existing locations
+;; TODO detect existing locations by content as well as ID
 (defn long-term-memory-add-location
   "Store a location by id in long-term memory"
   ([ltm location sv]
