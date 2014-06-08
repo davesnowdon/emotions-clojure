@@ -23,7 +23,7 @@
 ;;     memory
 ;; :ltm-entry - time added to long-term memory
 ;; :ltm-update-count - number of times record has been updated
-;; :data - percpt, location or agent specific data is in a map under
+;; :data - percept, location or agent specific data is in a map under
 ;;     this key
 
 
@@ -388,19 +388,27 @@
               :ltm-update-count 1
               :satisfaction-vector sv))
 
-;; TODO detect existing agents by content as well as ID
-(defn long-term-memory-add-agent
-  "Add an agent to long-term memory by id"
-  ([ltm location sv]
-     (long-term-memory-add-agent ltm agent sv (t/now)))
-  ([ltm agent sv timestamp]
-     (assoc-in ltm [:agents (:id agent)]
-               (ltm-augment agent timestamp sv))))
-
 (defn long-term-memory-find-agent
   "Retrieve an agent from long-term memory using its id"
   [ltm id]
   (get-in ltm [:agents id]))
+
+;; TODO detect existing agents by content as well as ID
+(defn long-term-memory-add-agent
+  "Add an agent to long-term memory by id"
+  ([ltm agent sv]
+     (long-term-memory-add-agent ltm agent sv (t/now)))
+  ([ltm agent sv timestamp]
+     (let [existing (long-term-memory-find-agent ltm (:id agent))]
+       (if existing
+         ltm
+         (assoc-in ltm [:agents (:id agent)]
+                   (ltm-augment agent timestamp sv))))))
+
+(defn long-term-memory-find-location
+  "Retrieve a location by id"
+  [ltm id]
+  (get-in ltm [:locations id]))
 
 ;; TODO detect existing locations by content as well as ID
 (defn long-term-memory-add-location
@@ -408,13 +416,11 @@
   ([ltm location sv]
      (long-term-memory-add-location ltm location sv (t/now)))
   ([ltm location sv timestamp]
-     (assoc-in ltm [:locations (:id location)]
-               (ltm-augment location timestamp sv))))
-
-(defn long-term-memory-find-location
-  "Retrieve a location by id"
-  [ltm id]
-  (get-in ltm [:locations id]))
+     (let [existing (long-term-memory-find-location ltm (:id location))]
+       (if existing
+         ltm
+         (assoc-in ltm [:locations (:id location)]
+                   (ltm-augment location timestamp sv))))))
 
 ;; TODO need to handle new items that don't already have an ID
 (defn- ltm-add-items
