@@ -195,10 +195,30 @@
   )
 
 ;; should be able to update an existing percept in LTM
+(let [template {:id (uuid)
+                :name "Angry"
+                :timestamp (t/now)
+                :other-agents #{:joe}
+                :locations #{:london}}
+      old-sv {:hunger 0.0, :survival 0.0 :joy 0.0}
+      old-percept (assoc template :satisfaction-vector old-sv)
+      new-percept (assoc template
+                    :satisfaction-vector
+                    {:hunger 0.0, :survival 0.5 :joy 0.0}
+                    :learning-vector
+                    {:hunger 0.1, :survival -0.2 :joy 0.1})
+      ltm (-> (long-term-memory-init)
+              (long-term-memory-add-percept old-percept)
+              (long-term-memory-add-percept new-percept))
+      new-sv (:satisfaction-vector (first (vals (:percepts ltm))))]
+  (expect (not (= old-sv new-sv)))
+  )
 
 ;; satisfaction vectors for locations should be updated
+;; TODO
 
 ;; satisfaction vectors for agents should be updated
+;; TODO
 
 ;; should be able to look up a percept in long-term memory and get
 ;; a satisfaction vector

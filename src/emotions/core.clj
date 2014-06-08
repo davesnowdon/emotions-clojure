@@ -44,6 +44,7 @@
 (def ltm-name-weight 1/3)
 (def ltm-agents-weight 1/3)
 (def ltm-location-weight 1/3)
+(def ltm-percept-max-age-seconds (* 365 24 60 60))
 
 ;; the min average value of a learning vector for a percept in order
 ;; to make it worth remembering
@@ -240,10 +241,15 @@
        (= (:other-agents p1) (:other-agents p2))
        (= (:locations p1) (:locations p2))))
 
+(defn- make-constant-map
+  "Create a map with the specified set of keys with all values being the specified constant"
+  [ks value]
+  (apply merge (map #(assoc {} % value) ks)))
+
 (defn- make-lv
   "Create a learning vector given a sequence of keys to use"
   [svk]
-  (apply merge (map #(assoc {} % 0.0) svk)))
+  (make-constant-map svk 0.0))
 
 (defn- add-stm-keys
   ([percepts sv retain-period]
@@ -410,6 +416,7 @@
   [ltm id]
   (get-in ltm [:locations id]))
 
+;; TODO need to handle new items that don't already have an ID
 (defn- ltm-add-items
   "Takes ltm a list of items and uses the supplied function to add them to LTM returning the new LTM and a list of ids"
   [ltm items add-fn]
@@ -419,13 +426,49 @@
         allids (concat onlyids (map :id njids))]
     {:ltm newltm :ids allids}))
 
+(defn- ltm-percept-add
+  "Add a new percept to LTM"
+  [ltm percept timestamp]
+  (assoc-in ltm [:percepts (percept->ltm-key percept)]
+                 (assoc percept :ltm-entry timestamp
+                                :ltm-update-count 1)))
+
+(defn sv+lv->sv
+  "Update a satisfaction vector using a learning vector the relative age and the number of times the sv has been updated"
+  [sv lv num-updates sv-age-seconds]
+  (let [unit-weight (/ 1 (+ num-updates 1))
+        sf (bounded- ltm-percept-max-age-seconds sv-age-seconds 0)
+        nsf (/ (float sf) ltm-percept-max-age-seconds)
+        sv-weight (/ (+ (* unit-weight num-updates) nsf) 2.0)
+        lv-weight (- 1.0 sv-weight)]
+    (merge-with +
+                (merge-with * sv (make-constant-map (keys sv) sv-weight))
+                (merge-with * lv (make-constant-map (keys sv) lv-weight)))))
+
+(defn- ltm-percept-update
+  "Update a percept already in LTM"
+  [ltm percept timestamp]
+  (let [key (percept->ltm-key percept)
+        existing (get-in ltm [:percepts key])
+        age (seconds-diff timestamp (:ltm-entry existing))
+        num-updates (:ltm-update-count existing)
+        sv (:satisfaction-vector existing)
+        lv (:learning-vector percept)
+        adjusted-sv (sv+lv->sv sv lv num-updates age)]
+    (assoc-in ltm [:percepts key]
+              (assoc existing :satisfaction-vector adjusted-sv
+                     :ltm-update-count (+ num-updates 1)))))
+
+;; TODO need to handle new items that don't already have an ID
 (defn long-term-memory-add-percept
   "Add a percept to long-term memory, adding new locations and agents as necessary"
   ([ltm percept]
      (long-term-memory-add-percept ltm percept (t/now)))
 
   ([ltm percept timestamp]
-     (let [sv (:satisfaction-vector percept)
+     (let [old-sv (:satisfaction-vector percept)
+           lv (:learning-vector percept)
+           sv (merge-with + old-sv lv)
            {altm :ltm aids :ids}
            (ltm-add-items ltm (:other-agents percept)
                           #(long-term-memory-add-agent %1 %2 sv timestamp))
@@ -433,10 +476,12 @@
            (ltm-add-items altm (:locations percept)
                           #(long-term-memory-add-location %1 %2 sv timestamp))
            npercept (assoc percept :locations (set lids)
-                                   :other-agents (set aids))]
-       (assoc-in lltm [:percepts (percept->ltm-key npercept)]
-                 (assoc npercept :ltm-entry timestamp
-                                :ltm-update-count 1)))))
+                           :other-agents (set aids))
+           key (percept->ltm-key npercept)
+           existing (get-in lltm [:percepts key])]
+       (if existing
+         (ltm-percept-update lltm npercept timestamp)
+         (ltm-percept-add lltm npercept timestamp)))))
 
 (defn- ltm-name-score
   [desired-name percept]
