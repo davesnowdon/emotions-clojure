@@ -59,6 +59,26 @@
                                           equivalent-percepts
                                           retain-period))))
 
+;; adding an empty sequence of percepts to short-term memory should have
+;; no effect
+(let [retain-period (t/millis 10000)
+      global-sv {:hunger 0.5, :survival 0.0}
+      percept {:id (uuid)
+               :name "Angry"
+               :timestamp (t/now)
+               :other-agents #{:joe}
+               :locations #{:london}}
+      stm (short-term-memory-add #{}
+                                 [percept]
+                                 global-sv
+                                 equivalent-percepts
+                                 retain-period)]
+  (expect 1 (count (short-term-memory-add stm
+                                          []
+                                          global-sv
+                                          equivalent-percepts
+                                          retain-period))))
+
 ;; adding a percept to short-term memory should give it an expiration time
 ;; and a learning vector
 (let [stm #{}

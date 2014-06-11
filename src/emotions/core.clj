@@ -281,7 +281,8 @@
   [stm percepts equiv-fn]
   (->> (for [s stm p percepts]
          (if (equiv-fn s p)
-           (assoc s :stm-expiration (:stm-expiration p))))
+           (assoc s :stm-expiration (:stm-expiration p))
+           s))
        (filter identity)))
 
 (defn short-term-memory-add
@@ -290,10 +291,15 @@
      (short-term-memory-add stm percepts global-sv equiv-fn retain-period (t/now)))
 
   ([stm percepts global-sv equiv-fn retain-period timestamp]
-     (let [with-expire (add-stm-keys percepts global-sv retain-period timestamp)
-           new-percepts (stm-new-percepts stm with-expire equiv-fn)
-           equiv-percepts (stm-equivalent-percepts stm with-expire equiv-fn)]
-       (concat (stm-extend-equiv stm equiv-percepts equiv-fn) new-percepts))))
+     (if (empty? percepts)
+       stm
+       (let [with-expire
+             (add-stm-keys percepts global-sv retain-period timestamp)
+             new-percepts
+             (stm-new-percepts stm with-expire equiv-fn)
+             equiv-percepts
+             (stm-equivalent-percepts stm with-expire equiv-fn)]
+         (concat (stm-extend-equiv stm equiv-percepts equiv-fn) new-percepts)))))
 
 (defn short-term-memory-expired
   "Remove percepts that have reached their expiration time. Returns a map containing the new short-term memory as :stm and the expired percepts with key :expired"
