@@ -279,11 +279,13 @@
 
 (defn- stm-extend-equiv
   [stm percepts equiv-fn]
-  (->> (for [s stm p percepts]
-         (if (equiv-fn s p)
-           (assoc s :stm-expiration (:stm-expiration p))
-           s))
-       (filter identity)))
+  (if (empty? percepts)
+    stm
+    (->> (for [s stm p percepts]
+           (if (equiv-fn s p)
+             (assoc s :stm-expiration (:stm-expiration p))
+             s))
+         (filter identity))))
 
 (defn short-term-memory-add
   "Add new percepts to short-term memory if they are not equivalent to existin percepts as defined by equiv-fn"
