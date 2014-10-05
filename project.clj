@@ -1,4 +1,4 @@
-(defproject emotions "0.1.4"
+(defproject emotions "0.2.0"
   :description "Clojure implementation of an emotional model for autonomous agents"
   :url "https://github.com/davesnowdon/emotions-clojure"
   :license {:name "LGPL v2.1"
