@@ -53,7 +53,7 @@
 ;; storing in long-term memory
 (def ltm-default-learning-vector-element-threshold 0.3)
 
-(defn decay-motivation
+(defn default-decay-motivation
   "Decay a motivation's current desire by the amount of its decay rate in seconds according to the time elapsed since the last update"
   [motivation time-since-update]
   (let [delta (* (:decay-rate motivation) time-since-update)]
@@ -62,7 +62,9 @@
 (defn decay-all-motivations
   "Decay a sequence of motivations according to the time since the last update"
   [motivations time-since-update]
-  (map #(decay-motivation % time-since-update) motivations))
+  (letfn [(do-decay [m tsu]
+            ((:decay-fn m default-decay-motivation) m tsu))]
+    (map #(do-decay % time-since-update) motivations)))
 
 (defn add-percept
   "Add the from a percept's satisfaction vector with the motivations current desire"

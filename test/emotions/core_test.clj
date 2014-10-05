@@ -48,21 +48,34 @@
 
 ;; desire should increase by value of :decay-rate
 (expect {:desire 0.1}
-        (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 1.0)))
+        (in (default-decay-motivation {:desire 0.0, :decay-rate 0.1} 1.0)))
 
 ;; if time since update is 0.5 seconds then desire should change by
 ;; half of decay rate
 (expect {:desire 0.05}
-        (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 0.5)))
+        (in (default-decay-motivation {:desire 0.0, :decay-rate 0.1} 0.5)))
 
 ;; if no time has elapsed there should be no change
 (expect {:desire 0.0}
-        (in (decay-motivation {:desire 0.0, :decay-rate 0.1} 0.0)))
+        (in (default-decay-motivation {:desire 0.0, :decay-rate 0.1} 0.0)))
 
 ;; decay all motivations should decay each motivation in a sequence
 (expect [{:id :hunger, :desire 0.1, :decay-rate 0.1,
           :max-delta 0.3, :layer :physical}]
         (decay-all-motivations [hunger] 1.0))
+
+;; if no decay function is provided, default should be used
+(let [hunger {:id :hunger, :desire 0.1, :decay-rate 0.1,
+              :max-delta 0.3, :layer :physical}]
+  (expect {:desire 0.2}
+          (in (first (decay-all-motivations [hunger] 1.0)))))
+
+;; if a decay function is provided, it should be used
+(let [hunger {:id :hunger, :desire 0.1,
+              :max-delta 0.3, :layer :physical
+              :decay-fn (fn [m tsu] (assoc m :desire 0.5))}]
+  (expect {:desire 0.5}
+          (in (first (decay-all-motivations [hunger] 1.0)))))
 
 ;; adding a percept should modify the motivations desire by the value in the
 ;; percept's satisfaction vector the corresponds to the motivation
