@@ -232,10 +232,13 @@
 (defn combine-attractors
   "Take a sequence of attractors and produce an overall valence and arousal"
   [attractors]
-  (let [sum (reduce sum-attractors attractors)]
-    {:valence (/ (:valence sum) (:weight sum))
-     :arousal (/ (:arousal sum) (:weight sum))
-     :weight 1.0}))
+  (let [sum (reduce sum-attractors attractors)
+        num-attractors (count attractors)]
+    (do
+      (println "att before normal" sum)
+      {:valence (/ (:valence sum) num-attractors)
+       :arousal (/ (:arousal sum) num-attractors)
+       :weight 1.0})))
 
 (defn attractor-fn->attractor
   "Given a desire value get the attractors for a motivation"
@@ -251,7 +254,8 @@
   "Take a satisfaction vector and motivations and compute the set of all attractors"
   [motivations sv]
   (let [attractor-fns (motivations->attractor-fns motivations)]
-    (map (fn [[k v]] (attractor-fn->attractor v (k attractor-fns))) sv)))
+    (apply concat
+          (map (fn [[k v]] (attractor-fn->attractor v (k attractor-fns))) sv))))
 
 (defn sv->valence+arousal
   "Calculate the valence and arousal scores for a given satisfaction vector"
