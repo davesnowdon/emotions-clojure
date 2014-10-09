@@ -26,10 +26,8 @@
 ;; :data - percept, location or agent specific data is in a map under
 ;;     this key
 
-
-;; control points map motivation threshold scores (called an
-;; expression vector) to points in valence/arousal space
-;; control point {:valence 1.0 :arousal 1.0 :expression-vector {} }
+;; each motivation has zero or more attractors which are used to map
+;; from a satisfaction vector to valence/arousal space
 
 ;; define default range for motivation desire values
 (def default-min-desire 0.0)
@@ -210,6 +208,17 @@
         isv2 (inhibit layers ls m2l isv1 layer-multipliers)
         pma (adjust-max-deltas pm isv2 default-max-change-delta)]
     [pma isv2]))
+
+;; code to compute valence & arousal from satisfaction vector
+(defn proportional-attractor
+  "Return an attractor who's weight varies proportionally with a desire value"
+  [valence, arousal, scale]
+  (fn [desire] {:valence valence :arousal arousal :weight (* desire scale)}))
+
+(defn inverse-attractor
+  "Return an attractor who's weight varies inversely with a desire value"
+  [valence, arousal, scale]
+  (fn [desire] {:valence valence :arousal arousal :weight (* (- 1.0 desire) scale)}))
 
 (defn expression-vector-distance
   "Returns value from 0.0 to 1.0 representing the similarity between an expression vector and a satisfaction vector. A value of 0.0 indicates a perfect match"

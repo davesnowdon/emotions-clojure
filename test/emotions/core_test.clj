@@ -352,42 +352,15 @@
                        (first
                         (adjust-max-deltas motivations sv 0.01))))))
 
-;; a satisfaction vector that perfectly matches an expression vector
-;; should return 0.0
-(expect (float= 0.0 (expression-vector-distance
-                     {:hunger 1.0 :survival 0.5 :joy 0.3}
-                     {:hunger 1.0 :survival 0.5 :joy 0.3})))
+;; a proportional attractor should match the input desire value
+(let [valence 0.75 arousal 0.75 scale 1.0
+      attractor (proportional-attractor valence, arousal scale)]
+  (expect (< (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
 
-;; a satisfaction vector that perfectly matches all the defined
-;; values in an expression vector should return zero
-(expect (float= 0.0 (expression-vector-distance
-                     {:survival 0.5 :joy 0.3}
-                     {:hunger 1.0 :survival 0.5 :joy 0.3})))
-
-;; a satisfaction vector that is the opposite of an expression vector
-;; should return 1.0
-(expect (float= 1.0 (expression-vector-distance
-                     {:hunger 1.0 :survival 1.0 :joy 1.0}
-                     {:hunger 0.0 :survival 0.0 :joy 0.0})))
-
-;; expression-vector-distance should return the normalised distance
-;; between an sv and an ev
-(expect (float= (/  (+ (- 0.8 0.5) (- 0.4 0.2)) 2)
-                (expression-vector-distance
-                 {:hunger 0.8 :survival 0.2}
-                 {:hunger 0.5 :survival 0.4 :joy 0.5})))
-
-;; if there is no overlap between an expression vector and satisfaction
-;; vector should return 1.0
-(expect (float= 1.0 (expression-vector-distance
-                     {:love 1.0 :hate 1.0}
-                     {:hunger 0.0 :survival 0.0 :joy 0.0})))
-
-;; an empty expression vector should be a distance of 1.0 from
-;; all satisfaction vectors
-(expect (float= 1.0 (expression-vector-distance
-                     {}
-                     {:hunger 0.0 :survival 0.0 :joy 0.0})))
+;; an inverse attractor should change inversely with the desire value
+(let [valence 0.75 arousal 0.75 scale 1.0
+      attractor (inverse-attractor valence arousal, scale)]
+  (expect (> (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
 
 ;; one control point that perfectly matches should return it's
 ;; arousal / valence coordinates
