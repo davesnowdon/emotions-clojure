@@ -58,3 +58,11 @@
   "Return the mean (average) of a collection of numbers"
   [num-coll]
   (/ (apply + num-coll) (count num-coll)))
+
+(defn interpolate
+  "Interpolate 2 values according to their relative weights"
+  [a a-weight b b-weight]
+  (let [w-sum (+ a-weight b-weight)
+        a-frac (/ a-weight w-sum)
+        b-frac (/ b-weight w-sum)]
+    (+ (* a-frac a) (* b-frac b))))

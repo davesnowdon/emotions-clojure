@@ -220,26 +220,38 @@
   [valence, arousal, scale]
   (fn [desire] {:valence valence :arousal arousal :weight (* (- 1.0 desire) scale)}))
 
-(defn expression-vector-distance
-  "Returns value from 0.0 to 1.0 representing the similarity between an expression vector and a satisfaction vector. A value of 0.0 indicates a perfect match"
-  [ev sv]
-  (if (> (count ev) 0)
-    (letfn [(sv-diff [a [k v]] (+ a  (if (nil? (sv k)) 1.0 (Math/abs (- v (sv k))))))]
-      (/ (reduce sv-diff 0.0 ev) (count ev)))
-    1.0))
+(defn sum-attractors
+  "Sum 2 attractors"
+  [a b]
+  {:valence (interpolate (:valence a) (:weight a) (:valence b) (:weight b))
+   :arousal (interpolate (:arousal a) (:weight a) (:arousal b) (:weight b))
+   :weight (+ (:weight a) (:weight b))})
+
+(defn combine-attractors
+  "Take a sequence of attractors and produce an overall valence and arousal"
+  [attractors]
+  (reduce sum-attractors attractors))
+
+(defn attractor-fn->attractor
+  "Given a desire value get the attractors for a motivation"
+  [desire fns]
+  (map (fn [a] (a desire)) fns))
+
+(defn motivations->attractor-fns
+  "Make a map from motivation id to sequence of attractors"
+  [motivations]
+  (make-motivation-map motivations :id :attractors))
+
+(defn get-attractors
+  "Take a satisfaction vector and motivations and compute the set of all attractors"
+  [motivations sv]
+  (let [attractor-fns (motivations->attractor-fns motivations)]
+    (map (fn [[k v]] (attractor-fn->attractor v (k attractor-fns))) sv)))
 
 (defn sv->valence+arousal
   "Calculate the valence and arousal scores for a given satisfaction vector"
-  [control-points sv]
-  (letfn [(add-dist [cp]
-            (let [dist (expression-vector-distance (:expression-vector cp) sv)]
-              (assoc cp :distance dist :weight (- 1.0 dist))))
-          (ord-val [k acc cp] (+ acc (* (:weight cp) (cp k))))]
-    (let [with-dist (map add-dist control-points)
-          valence (reduce (partial ord-val :valence) 0.0 with-dist)
-          arousal (reduce (partial ord-val :arousal) 0.0 with-dist)
-          total-weight (reduce (fn [acc cp] (+ acc (:weight cp))) 0.0 with-dist)]
-      {:valence (/ valence total-weight) :arousal (/ arousal total-weight)})))
+  [motivations sv]
+  (combine-attractors (get-attractors motivations sv)))
 
 ;;
 ;; Functions related to short-term memory

@@ -362,20 +362,19 @@
       attractor (inverse-attractor valence arousal, scale)]
   (expect (> (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
 
-;; one control point that perfectly matches should return it's
-;; arousal / valence coordinates
-(let [cp [ {:valence -1 :arousal 1
-            :expression-vector {:survival 0.5 :joy 0.3}}]
-      sv {:hunger 1.0 :survival 0.5 :joy 0.3}]
-  (expect (float= -1.0 (:valence (sv->valence+arousal cp sv))))
-  (expect (float= 1.0 (:arousal (sv->valence+arousal cp sv)))))
+;; combining a single attractor should simply return that attractor
+(let [attractor ((proportional-attractor -1.0 -1.0 1.0) 1.0)]
+  (expect attractor (combine-attractors [attractor])))
 
-;; a control point that does not match should not influence the
-;; valence arousal
-(let [cp [ {:valence -1 :arousal 1
-            :expression-vector {:survival 0.5 :joy 0.3}}
-           {:valence 1 :arousal -1
-            :expression-vector {:love 0.5 :hate 0.3}}]
-      sv {:hunger 1.0 :survival 0.5 :joy 0.3}]
-  (expect (float= -1.0 (:valence (sv->valence+arousal cp sv))))
-  (expect (float= 1.0 (:arousal (sv->valence+arousal cp sv)))))
+;; summing two attractors should result in valance and arousal values
+;; interpolated according to the weights. The result should not depend
+;; on order of attractors
+(let [a-low ((proportional-attractor -1.0 -1.0 1.0) 1.0)
+      a-high ((proportional-attractor 1.0 1.0 1.0) 1.0)
+      result1 (combine-attractors [a-low a-high])
+      result2 (combine-attractors [a-high a-low])]
+  (expect (and (float= 0 (:valence result1))
+               (float= 0 (:arousal result1))))
+  (expect (and (float= 0 (:valence result2))
+               (float= 0 (:arousal result2))))
+  (expect result1 result2))
