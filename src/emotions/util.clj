@@ -66,3 +66,8 @@
         a-frac (/ a-weight w-sum)
         b-frac (/ b-weight w-sum)]
     (+ (* a-frac a) (* b-frac b))))
+
+(defn interpolate-unnormalised
+  "Interpolate 2 values according to their relative weights"
+  [a a-weight b b-weight]
+  (+ (* a a-weight) (* b b-weight)))

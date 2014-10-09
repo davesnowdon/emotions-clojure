@@ -223,14 +223,19 @@
 (defn sum-attractors
   "Sum 2 attractors"
   [a b]
-  {:valence (interpolate (:valence a) (:weight a) (:valence b) (:weight b))
-   :arousal (interpolate (:arousal a) (:weight a) (:arousal b) (:weight b))
+  {:valence (interpolate-unnormalised (:valence a) (:weight a)
+                                      (:valence b) (:weight b))
+   :arousal (interpolate-unnormalised (:arousal a) (:weight a)
+                                      (:arousal b) (:weight b))
    :weight (+ (:weight a) (:weight b))})
 
 (defn combine-attractors
   "Take a sequence of attractors and produce an overall valence and arousal"
   [attractors]
-  (reduce sum-attractors attractors))
+  (let [sum (reduce sum-attractors attractors)]
+    {:valence (/ (:valence sum) (:weight sum))
+     :arousal (/ (:arousal sum) (:weight sum))
+     :weight 1.0}))
 
 (defn attractor-fn->attractor
   "Given a desire value get the attractors for a motivation"
