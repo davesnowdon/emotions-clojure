@@ -236,8 +236,8 @@
         num-attractors (count attractors)]
     (do
       (println "att before normal" sum)
-      {:valence (/ (:valence sum) num-attractors)
-       :arousal (/ (:arousal sum) num-attractors)
+      {:valence (restrict (/ (:valence sum) num-attractors) -1.0 1.0)
+       :arousal (restrict (/ (:arousal sum) num-attractors) -1.0 1.0)
        :weight 1.0})))
 
 (defn attractor-fn->attractor

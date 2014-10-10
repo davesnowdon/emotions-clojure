@@ -71,3 +71,11 @@
   "Interpolate 2 values according to their relative weights"
   [a a-weight b b-weight]
   (+ (* a a-weight) (* b b-weight)))
+
+(defn restrict
+  "Restrict input to be within range"
+  [value min max]
+  (cond
+   (> value max) max
+   (< value min) min
+   :else value))
