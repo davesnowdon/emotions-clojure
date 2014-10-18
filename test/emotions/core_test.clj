@@ -398,3 +398,68 @@
           :scale 1.0}
       attractor (map->attractor am)]
   (expect (> (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
+
+;; should create a motivation with a proportional attractor
+(let [motivation
+      {:id :phys-anger :name "anger" :layer :physical
+       :valence -0.7 :arousal 0.7
+       :desire 0.0 :decay-rate -0.02 :max-delta 1.0
+       :learning-window 30000
+       :description "gets irritated if frustrated in achieving an action"
+       :attractors [{:fn "proportional-attractor"
+                     :valence -0.75
+                     :arousal 0.75
+                     :scale 2.0}]}
+      result (read-motivation motivation)
+      attractor (first (:attractors result))]
+  (expect (< (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
+
+;; should create motivation with inverse attractors
+(let [motivation
+      {:id :saf-delight :name "delight" :layer :safety
+       :valence 0.7 :arousal 0.7
+       :desire 0.5 :decay-rate 0.0 :max-delta 0.8
+       :learning-window 60000
+       :description "try and seek out things (i.e. friends) with positive associations"
+       :attractors [{:fn "inverse-attractor"
+                     :valence 1.0
+                     :arousal 0.75
+                     :scale 1.0}]}
+      result (read-motivation motivation)
+      attractor (first (:attractors result))]
+  (expect (> (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
+
+;; should create motivation with 2 attractors
+(let [motivation
+      {:id :saf-delight :name "delight" :layer :safety
+       :valence 0.7 :arousal 0.7
+       :desire 0.5 :decay-rate 0.0 :max-delta 0.8
+       :learning-window 60000
+       :description "try and seek out things (i.e. friends) with positive associations"
+       :attractors [{:fn "inverse-attractor"
+                     :valence 1.0
+                     :arousal 0.75
+                     :scale 1.0}
+                    {:fn "proportional-attractor"
+                     :valence -0.75
+                     :arousal -0.75
+                     :scale 1.0}]}
+      result (read-motivation motivation)
+      attractors (:attractors result)
+      attractor1 (first attractors)
+      attractor2 (second attractors)]
+  (expect 2 (count attractors))
+  (expect (not (map? attractor1)))
+  (expect (not (map? attractor2))))
+
+;; should create motivation with no attractors
+(let [motivation
+      {:id :phys-hunger :name "hunger" :layer :physical
+       :valence 0.0 :arousal 0.5
+       :desire 0.0 :decay-rate 0.0 :max-delta 1.0
+       :learning-window (* 2 60 60 1000)
+       :description "monitor battery level"
+       :attractors []}
+      result (read-motivation motivation)
+      attractors (:attractors result)]
+  (expect 0 (count attractors)))

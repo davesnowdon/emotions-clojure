@@ -233,6 +233,17 @@
     ((name->function (:fn attr)) attr)
     attr))
 
+(defn read-motivation
+  "Read a single motivation and convert to a usable form (executable attractor functions)"
+  [motivation]
+  motivation
+  (assoc motivation :attractors
+         (map map->attractor (:attractors motivation))))
+
+(defn read-motivations
+  "Read data struction with motivations and convert attractor maps into fucntions"
+  [motivations])
+
 (defn sum-attractors
   "Sum 2 attractors"
   [a b]
