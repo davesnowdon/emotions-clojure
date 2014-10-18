@@ -242,7 +242,8 @@
 
 (defn read-motivations
   "Read data struction with motivations and convert attractor maps into fucntions"
-  [motivations])
+  [motivations]
+  (map read-motivation motivations))
 
 (defn sum-attractors
   "Sum 2 attractors"
