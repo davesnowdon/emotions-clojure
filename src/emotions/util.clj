@@ -79,3 +79,8 @@
    (> value max) max
    (< value min) min
    :else value))
+
+(defn name->function
+  "Resolve the name of the function as a string to the function itself"
+  [name]
+  (resolve (symbol name)))
