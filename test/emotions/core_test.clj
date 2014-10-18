@@ -378,3 +378,23 @@
   (expect (and (float= 0 (:valence result2))
                (float= 0 (:arousal result2))))
   (expect result1 result2))
+
+;; something that is not a map should not ne modified
+(let [not-map identity]
+  (expect not-map (map->attractor not-map)))
+
+;; create proportional attractor from map
+(let [am {:fn "proportional-attractor"
+          :valence 0.5
+          :arousal 0.5
+          :scale 1.0}
+      attractor (map->attractor am)]
+  (expect (< (:weight (attractor 0.5)) (:weight (attractor 1.0)))))
+
+;; create inverse attractor from map
+(let [am {:fn "inverse-attractor"
+          :valence 0.5
+          :arousal 0.5
+          :scale 1.0}
+      attractor (map->attractor am)]
+  (expect (> (:weight (attractor 0.5)) (:weight (attractor 1.0)))))

@@ -212,13 +212,26 @@
 ;; code to compute valence & arousal from satisfaction vector
 (defn proportional-attractor
   "Return an attractor who's weight varies proportionally with a desire value"
-  [valence, arousal, scale]
-  (fn [desire] {:valence valence :arousal arousal :weight (* desire scale)}))
+  ([valence, arousal, scale]
+     (fn [desire] {:valence valence :arousal arousal
+                  :weight (* desire scale)}))
+  ([{:keys [valence arousal scale]}]
+     (proportional-attractor valence arousal scale)))
 
 (defn inverse-attractor
   "Return an attractor who's weight varies inversely with a desire value"
-  [valence, arousal, scale]
-  (fn [desire] {:valence valence :arousal arousal :weight (* (- 1.0 desire) scale)}))
+  ([valence, arousal, scale]
+     (fn [desire] {:valence valence :arousal arousal
+                  :weight (* (- 1.0 desire) scale)}))
+  ([{:keys [valence arousal scale]}]
+     (inverse-attractor valence arousal scale)))
+
+(defn map->attractor
+  "Take a map with attractor parameters and convert to an attractor function. If parameter is not a map then it is returned as is"
+  [attr]
+  (if (map? attr)
+    ((name->function (:fn attr)) attr)
+    attr))
 
 (defn sum-attractors
   "Sum 2 attractors"
