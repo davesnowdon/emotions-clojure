@@ -3,9 +3,41 @@
             [emotions.serialise :refer :all]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [clojure.spec :as s]))
 
-;; motivations are maps, with keys
+
+;; common keys
+(s/def ::id keyword?)
+(s/def ::name string?)
+(s/def ::layer keyword?)
+(s/def ::timestamp inst?)
+(s/def ::learning-window int?)
+(s/def ::satisfaction-vector map?)
+(s/def ::satisfaction-vector-obs ::satisfaction-vector)
+
+;; emotional output state description
+(s/def ::valence double?)
+(s/def ::pleasure double?)
+(s/def ::arousal double?)
+(s/def ::dominance double?)
+(s/def ::va (s/keys :req [::valence ::arousal]))
+(s/def ::pad (s/keys :req [::pleasure ::arousal ::dominance]))
+(s/def ::output-state (s/or :va ::va :pad ::pad))
+
+;; motivations are maps
+;; each motivation has zero or more attractors which are used to map
+;; from a satisfaction vector to valence/arousal space
+(s/def ::desire double?)
+(s/def ::decay-rate double?)
+(s/def ::max-delta  double?)
+(s/def ::motivation
+  (s/and
+   (s/keys :req [::id ::name ::layer]
+           :opt [::desire ::decay-rate ::max-delta ::learning-window])
+   ::output-state))
+
+
 ;; learning-window-ms - learning window in milliseconds
 
 ;; satisfaction vectors are maps with the motivation name as a key
@@ -25,9 +57,20 @@
 ;; :ltm-update-count - number of times record has been updated
 ;; :data - percept, location or agent specific data is in a map under
 ;;     this key
+(s/def ::other-agents set?)
+(s/def ::locations set?)
+(s/def ::stm-entry ::timestamp)
+(s/def ::stm-expiration ::timestamp)
+(s/def ::ltm-entry ::timestamp)
+(s/def ::ltm-update-count int?)
+(s/def ::data map?)
+(s/def ::percept
+  (s/keys :req [::satisfaction-vector ::timestamp]
+          :opt [::satisfaction-vector-obs ::other-agents ::locations
+                ::stm-entry ::stm-expiration
+                ::ltm-entry ::ltm-update-count
+                ::data]))
 
-;; each motivation has zero or more attractors which are used to map
-;; from a satisfaction vector to valence/arousal space
 
 ;; define default range for motivation desire values
 (def default-min-desire 0.0)

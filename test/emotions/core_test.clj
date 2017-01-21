@@ -1,5 +1,5 @@
 (ns emotions.core-test
-  (:require [emotions.core :refer :all]
+  (:require [emotions.core :as e :refer :all]
             [emotions.util :refer :all]
             [emotions.motivations :refer :all]
             [expectations :refer :all]

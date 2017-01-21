@@ -1,9 +1,9 @@
-(defproject emotions "0.2.2"
+(defproject emotions "0.3.0"
   :description "Clojure implementation of an emotional model for autonomous agents"
   :url "https://github.com/davesnowdon/emotions-clojure"
   :license {:name "LGPL v2.1"
             :url "http://www.gnu.org/licenses/lgpl-2.1.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [clj-time "0.13.0"]
                  [expectations "2.1.9"]]
   :profile {:dev {:dependencies [[expectations "2.1.9"]]}}
